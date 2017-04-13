@@ -1,0 +1,4 @@
+source https://api.nuget.org/v3/index.json
+
+nuget FSharp.Core >= 4.1
+nuget FSharp.NET.Sdk >= 1.0.1
