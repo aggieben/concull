@@ -12,9 +12,7 @@ module Web =
         }
 
     let fetchDocumentWithContext (context:IBrowsingContext) (uri:string) =
-        async {
-            return! Async.AwaitTask (context.OpenAsync(uri))
-        }
+        Async.AwaitTask (context.OpenAsync(uri))
 
     let fetchDocument (uri:string) =
         let context = BrowsingContext.New(Configuration.Default)
