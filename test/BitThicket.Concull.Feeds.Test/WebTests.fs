@@ -24,7 +24,6 @@ let ``extract content from http response`` () =
         let! result = Web.fetchContent client "http://benjamincollins.com/blog/a-working-example-of-permissions-authorization/"
 
         Assert.NotNull(result)
-        Console.WriteLine(result)
     }
 
 
