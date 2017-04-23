@@ -2,11 +2,12 @@ references: strict
 source https://api.nuget.org/v3/index.json
 source https://dotnet.myget.org/F/dotnet-core/api/v3/index.json
 
-nuget NETStandard.Library ~> 2.0 prerelease
+nuget NETStandard.Library ~> 1.6
 nuget FSharp.Core ~> 4.1
-nuget FSharp.Data ~> 2.3
 nuget FSharp.NET.Sdk ~> 1.0.1
 nuget Microsoft.NET.Test.Sdk
-nuget xunit ~> 2.2
+
+nuget AngleSharp
+nuget xunit ~> 2.3 prerelease
 nuget xunit.runner.visualstudio ~> 2.2
 nuget dotnet-xunit ~> 2.3 prerelease
