@@ -1,0 +1,1203 @@
+<!DOCTYPE HTML>
+
+<html>
+    <head>
+        
+            
+                <title>a working example of permissions authorization</title>
+            
+        
+
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="generator" content="Hugo 0.15" />
+        
+
+
+        
+            <meta name="author" content="Ben Collins">
+        
+        
+            
+                <meta name="description" content="Personal site for Ben Collins. Powered by Hugo">
+            
+        
+
+        
+
+  <meta name="twitter:card" content="summary"/>
+
+
+
+<meta name="twitter:title" content="a working example of permissions authorization"/>
+<meta name="twitter:description" content="Motivation In my previous post, Practical Permission-based Authorization in ASP.NET Core, I tried to demonstrate how to implement a regime of permissions-based authorization without having to stuff it all into an ever-exploding list of roles, without abusing claims, and without having to roll your own framework-fighting implementation. Resource filters allow you to do this elegantly and still remain in harmony with the framework. However, I may have been too terse. I got a couple questions and a request for a working example, which seemed like a reasonable request, so that what this post is about."/>
+<meta name="twitter:site" content="@aggieben"/>
+
+
+        <meta property="og:title" content="a working example of permissions authorization" />
+<meta property="og:description" content="Motivation In my previous post, Practical Permission-based Authorization in ASP.NET Core, I tried to demonstrate how to implement a regime of permissions-based authorization without having to stuff it all into an ever-exploding list of roles, without abusing claims, and without having to roll your own framework-fighting implementation. Resource filters allow you to do this elegantly and still remain in harmony with the framework. However, I may have been too terse. I got a couple questions and a request for a working example, which seemed like a reasonable request, so that what this post is about." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://benjamincollins.com/blog/a-working-example-of-permissions-authorization/" />
+
+
+<meta property="og:updated_time" content="2016-10-20T21:50:06-05:00"/>
+
+
+
+
+
+
+
+
+
+
+        
+<meta itemprop="name" content="a working example of permissions authorization">
+<meta itemprop="description" content="Motivation In my previous post, Practical Permission-based Authorization in ASP.NET Core, I tried to demonstrate how to implement a regime of permissions-based authorization without having to stuff it all into an ever-exploding list of roles, without abusing claims, and without having to roll your own framework-fighting implementation. Resource filters allow you to do this elegantly and still remain in harmony with the framework. However, I may have been too terse. I got a couple questions and a request for a working example, which seemed like a reasonable request, so that what this post is about.">
+
+
+<meta itemprop="dateModified" content="2016-10-20T21:50:06-05:00" />
+<meta itemprop="wordCount" content="1637">
+
+
+
+<meta itemprop="keywords" content="asp.net core,azure,christianity,crosspost,hugo,node,politics,programming,remote-working,reviews starwars sci-fi,security,asp.net core,asp.net core security,azure,hugo,remote-working,reviews starwars sci-fi," />
+
+        
+
+        
+
+        
+        
+            
+        
+
+        
+        
+
+        
+            
+                
+                    <link rel="stylesheet" href="http://benjamincollins.com/css/main.min.css" />
+                
+            
+        
+
+        
+        
+        
+            
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-75176-9', 'auto');
+ga('send', 'pageview');
+</script>
+
+        
+    </head>
+    <body>
+
+        
+        <div id="wrapper">
+
+    
+    
+<header id="header">
+    
+        <h2><a href="http://benjamincollins.com/">Ben Collins</i></a></h2>
+    
+
+    <nav class="links">
+        <ul>
+            
+                <li>
+                    <a href="http://benjamincollins.com/blog/">
+                        
+                            <i class="fa fa-newspaper-o">&nbsp;</i>Blog
+                    </a>
+                </li>
+            
+                <li>
+                    <a href="http://benjamincollins.com/categories/">
+                        Categories
+                    </a>
+                </li>
+            
+                <li>
+                    <a href="http://benjamincollins.com/projects/">
+                        Projects
+                    </a>
+                </li>
+            
+                <li>
+                    <a href="http://benjamincollins.com/about/">
+                        About
+                    </a>
+                </li>
+            
+        </ul>
+    </nav>
+    <nav class="main">
+        <ul>
+            
+            <li id="share-nav" class="share-menu" style="display:none;">
+                <a class="fa-share-alt" href="#share-menu">Share</a>
+            </li>
+            
+            <li class="search">
+                <a class="fa-search" href="#search">Search</a>
+                <form id="search" method="get" action="//google.com/search">
+                    <input type="text" name="q" placeholder="Search" />
+                    <input type="hidden" name="q" value="site:http://benjamincollins.com/">
+                </form>
+            </li>
+            <li class="menu">
+                <a class="fa-bars" href="#menu">Menu</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+
+<section id="menu">
+
+    
+        <section>
+            <form class="search" method="get" action="//google.com/search">
+                <input type="text" name="q" placeholder="Search" />
+                <input type="hidden" name="q" value="site:http://benjamincollins.com/">
+            </form>
+        </section>
+
+    
+        <section>
+            <ul class="links">
+                
+                    <li>
+                        <a href="http://benjamincollins.com/blog/">
+                            <h3>
+                                
+                                    <i class="fa fa-newspaper-o">&nbsp;</i>
+                                
+                                Blog
+                            </h3>
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="http://benjamincollins.com/categories/">
+                            <h3>
+                                
+                                Categories
+                            </h3>
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="http://benjamincollins.com/projects/">
+                            <h3>
+                                
+                                Projects
+                            </h3>
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="http://benjamincollins.com/about/">
+                            <h3>
+                                
+                                About
+                            </h3>
+                        </a>
+                    </li>
+                
+            </ul>
+        </section>
+
+    
+        <section>
+            <ul class="links">
+                <header>
+                    <h3>Recent Posts</h3>
+                </header>
+                
+                    
+                
+
+                
+                    <li>
+                        <a href="http://benjamincollins.com/blog/lets-chat-about-naming/"><p>Let&#39;s chat about naming</p></a>
+                    </li>
+                
+                    <li>
+                        <a href="http://benjamincollins.com/blog/a-working-example-of-permissions-authorization/"><p>a working example of permissions authorization</p></a>
+                    </li>
+                
+                    <li>
+                        <a href="http://benjamincollins.com/blog/using-dependency-injection-while-configuring-services/"><p>Using dependency injection while configuring services</p></a>
+                    </li>
+                
+                    <li>
+                        <a href="http://benjamincollins.com/blog/practical-permission-based-authorization-in-asp-net-core/"><p>Practical Permissions-based Authorization in ASP.NET Core MVC</p></a>
+                    </li>
+                
+                    <li>
+                        <a href="http://benjamincollins.com/blog/an-integration-testing-nightmare/"><p>an integration testing nightmare</p></a>
+                    </li>
+                
+            </ul>
+        </section>
+
+    
+        
+</section>
+
+    <section id="share-menu">
+    <section id="social-share-nav">
+        <ul class="links">
+            <header>
+                <h3>Share this post <i class="fa fa-smile-o"></i></h3>
+            </header>
+            
+
+
+<li><a href="//twitter.com/share?url=http%3a%2f%2fbenjamincollins.com%2fblog%2fa-working-example-of-permissions-authorization%2f&text=a%20working%20example%20of%20permissions%20authorization&via=aggieben" target="_blank" class="share-btn twitter">
+    <i class="fa fa-twitter"></i>
+    <p>Twitter</p>
+</a></li>
+
+
+<li><a href="//plus.google.com/share?url=http%3a%2f%2fbenjamincollins.com%2fblog%2fa-working-example-of-permissions-authorization%2f" target="_blank" class="share-btn google-plus">
+    <i class="fa fa-google-plus"></i>
+    <p>Google+</p>
+</a></li>
+
+
+<li><a href="//www.facebook.com/sharer/sharer.php?u=http%3a%2f%2fbenjamincollins.com%2fblog%2fa-working-example-of-permissions-authorization%2f" target="_blank" class="share-btn facebook">
+    <i class="fa fa-facebook"></i>
+    <p>Facebook</p>
+</a></li>
+
+
+<li><a href="//reddit.com/submit?url=http%3a%2f%2fbenjamincollins.com%2fblog%2fa-working-example-of-permissions-authorization%2f&title=a%20working%20example%20of%20permissions%20authorization" target="_blank" class="share-btn reddit">
+    <i class="fa fa-reddit-alien"></i>
+    <p>Reddit</p>
+</a></li>
+
+
+<li><a href="//www.linkedin.com/shareArticle?url=http%3a%2f%2fbenjamincollins.com%2fblog%2fa-working-example-of-permissions-authorization%2f&title=a%20working%20example%20of%20permissions%20authorization" target="_blank" class="share-btn linkedin">
+    <i class="fa fa-linkedin"></i>
+    <p>LinkedIn</p>
+</a></li>
+
+
+<li><a href="//www.stumbleupon.com/submit?url=http%3a%2f%2fbenjamincollins.com%2fblog%2fa-working-example-of-permissions-authorization%2f&title=a%20working%20example%20of%20permissions%20authorization" target="_blank" class="share-btn stumbleupon">
+    <i class="fa fa-stumbleupon"></i>
+    <p>StumbleUpon</p>
+</a></li>
+
+
+<li><a href="mailto:?subject=Check out this post by Ben%20Collins&body=http%3a%2f%2fbenjamincollins.com%2fblog%2fa-working-example-of-permissions-authorization%2f" target="_blank" class="share-btn email">
+    <i class="fa fa-envelope"></i>
+    <p>Email</p>
+</a></li>
+
+        </ul>
+    </section>
+</section>
+
+    
+    <div id="main">
+        
+        
+        <article class="post">
+    <header>
+    <div class="title">
+        
+            <h1><a href="http://benjamincollins.com/blog/a-working-example-of-permissions-authorization/">a working example of permissions authorization</a></h1>
+            
+        
+        
+    </div>
+    <div class="meta">
+        
+            
+        
+
+        <time class="published"
+            datetime='2016-10-20'>
+            October 20, 2016</time>
+        <span class="author">Ben Collins</span>
+        
+            <p>8 minute read</p>
+        
+        
+    </div>
+</header>
+
+
+    <section id="social-share">
+        <ul class="icons">
+            
+
+
+<li><a href="//twitter.com/share?url=http%3a%2f%2fbenjamincollins.com%2fblog%2fa-working-example-of-permissions-authorization%2f&text=a%20working%20example%20of%20permissions%20authorization&via=aggieben" target="_blank" class="share-btn twitter">
+    <i class="fa fa-twitter"></i>
+    <p>Twitter</p>
+</a></li>
+
+
+<li><a href="//plus.google.com/share?url=http%3a%2f%2fbenjamincollins.com%2fblog%2fa-working-example-of-permissions-authorization%2f" target="_blank" class="share-btn google-plus">
+    <i class="fa fa-google-plus"></i>
+    <p>Google+</p>
+</a></li>
+
+
+<li><a href="//www.facebook.com/sharer/sharer.php?u=http%3a%2f%2fbenjamincollins.com%2fblog%2fa-working-example-of-permissions-authorization%2f" target="_blank" class="share-btn facebook">
+    <i class="fa fa-facebook"></i>
+    <p>Facebook</p>
+</a></li>
+
+
+<li><a href="//reddit.com/submit?url=http%3a%2f%2fbenjamincollins.com%2fblog%2fa-working-example-of-permissions-authorization%2f&title=a%20working%20example%20of%20permissions%20authorization" target="_blank" class="share-btn reddit">
+    <i class="fa fa-reddit-alien"></i>
+    <p>Reddit</p>
+</a></li>
+
+
+<li><a href="//www.linkedin.com/shareArticle?url=http%3a%2f%2fbenjamincollins.com%2fblog%2fa-working-example-of-permissions-authorization%2f&title=a%20working%20example%20of%20permissions%20authorization" target="_blank" class="share-btn linkedin">
+    <i class="fa fa-linkedin"></i>
+    <p>LinkedIn</p>
+</a></li>
+
+
+<li><a href="//www.stumbleupon.com/submit?url=http%3a%2f%2fbenjamincollins.com%2fblog%2fa-working-example-of-permissions-authorization%2f&title=a%20working%20example%20of%20permissions%20authorization" target="_blank" class="share-btn stumbleupon">
+    <i class="fa fa-stumbleupon"></i>
+    <p>StumbleUpon</p>
+</a></li>
+
+
+<li><a href="mailto:?subject=Check out this post by Ben%20Collins&body=http%3a%2f%2fbenjamincollins.com%2fblog%2fa-working-example-of-permissions-authorization%2f" target="_blank" class="share-btn email">
+    <i class="fa fa-envelope"></i>
+    <p>Email</p>
+</a></li>
+
+        </ul>
+    </section>
+    
+
+    <div id="content">
+        
+
+<h1 id="motivation:edf38bf76e9397e52e908ae7737543bc">Motivation</h1>
+
+<p>In my previous post, <a href="http://benjamincollins.com/blog/practical-permission-based-authorization-in-asp-net-core/">Practical Permission-based Authorization in ASP.NET Core</a>, I tried to demonstrate how to implement a regime of
+permissions-based authorization without having to stuff it all into an ever-exploding list of roles, without abusing claims,
+and without having to roll your own framework-fighting implementation.  Resource filters allow you to do this elegantly and
+still remain in harmony with the framework.</p>
+
+<p>However, I may have been too terse.  I got a couple questions and a request for a working example, which seemed like a
+reasonable request, so that what this post is about.  Part of what I realized I needed to do is fill in a bunch of gaps about
+which I assumed the reader&rsquo;s <em>a priori</em> knowledge.  That was a mistake, and so this post will go into more detail about how
+all this stuff works.</p>
+
+<p>The code is available at GitHub: <a href="https://github.com/trinityrepublic/demo-authorization">trinityrepublic/demo-authorization</a>.</p>
+
+<h1 id="overview:edf38bf76e9397e52e908ae7737543bc">Overview</h1>
+
+<p>First things first.  In the other post, I linked to the ASP.NET Core documentation, but maybe I didn&rsquo;t lean into that as
+aggressively as I should have.  If you have not at least read the section called
+<a href="https://docs.asp.net/en/latest/mvc/controllers/filters.html#how-do-filters-work">How do filters work?</a>,
+then you stand a good chance of not following this.  Go on, right now. Read it.  It will take you 2 minutes, and this post
+is just a back-button click away.</p>
+
+<p>I&rsquo;ve used the default web project template from the CLI tooling (<code>1.0.0-preview2-003133</code>).  It uses the ASP.NET Identity
+framework to manage authentication (remember, <a href="http://stackoverflow.com/a/6556548/3279">authentication is not the same as authorization</a>).
+Permissions are an <em>authorization</em> concern.  So we&rsquo;re going to let Identity handle <em>authentication</em> for us using the defaults.</p>
+
+<p>You&rsquo;ll see the following in <code>Startup.cs</code> (with a bunch of stuff omitted&hellip;)</p>
+
+<pre><code class="language-C#">namespace WebApplication
+{
+    public class Startup
+    {
+        public Startup(IHostingEnvironment env)
+        {
+            /* stuff */
+        }
+
+        public IConfigurationRoot Configuration { get; }
+
+        public void ConfigureServices(IServiceCollection services)
+        {
+            /* stuff */
+        }
+
+        public void Configure(IApplicationBuilder app, 
+                              IHostingEnvironment env, 
+                              ILoggerFactory loggerFactory)
+        {
+            loggerFactory.AddConsole(Configuration.GetSection(&quot;Logging&quot;));
+            loggerFactory.AddDebug();
+
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                app.UseDatabaseErrorPage();
+                app.UseBrowserLink();
+            }
+            else
+            {
+                app.UseExceptionHandler(&quot;/Home/Error&quot;);
+            }
+
+            app.UseStaticFiles();
+
+            // ************** THE IMPORTANT PART OF THIS SNIPPET *****************
+            app.UseIdentity();
+            // *******************************************************************
+
+            app.UseMvc(routes =&gt;
+            {
+                routes.MapRoute(
+                    name: &quot;default&quot;,
+                    template: &quot;{controller=Home}/{action=Index}/{id?}&quot;
+                )
+            });
+        }
+    }
+}
+</code></pre>
+
+<p>The indicated line above, <code>app.UseIdentity()</code>, is an <code>IApplicationBuilder</code> extension method provided by the Identity
+framework. You can <a href="https://github.com/aspnet/Identity/blob/dev/src/Microsoft.AspNetCore.Identity/BuilderExtensions.cs">see for yourself what it does</a>, but for our
+purposes what you really need to know is that it registers cookie authentication (using similar builder extension methods),
+which in turn register <code>CookieAuthenticationMiddleware</code>, which in turn registers the <code>CookieAuthenticationHandler</code>, which is
+the class that does the actual authentication for us.</p>
+
+<p>This (and any) authentication handler will do the work to figure out if a user&rsquo;s claims about their identity are valid.  If
+so, then the handler will mark this particular identity as authenticated.  So just to be extra clear: whether or not a user
+is <em>authenticated</em> is always a binary question.  Yes, or no.  True or false.</p>
+
+<h1 id="details:edf38bf76e9397e52e908ae7737543bc">Details</h1>
+
+<p>Now to authorization.  In ASP.NET Core, rather than the old membership system in which users could be placed in roles and
+authorization granted based on membership in a role, authorization is built on &ldquo;policies&rdquo;.  Role membership is a
+pre-configured policy and is still supported (see <a href="https://docs.asp.net/en/latest/security/authorization/roles.html">Role based Authorization</a>), but the framework allows you to define
+arbitrary policies, which gives us a <em>lot</em> more flexibility in how we authorize our users.  But wait!  Weren&rsquo;t we just
+talking about authentication?  Yes - and here&rsquo;s the link: the default authorization policy configured in ASP.NET Core is to
+test for authentication.  That&rsquo;s why when you first start a new application you slap the <code>[Authorize]</code> attribute on
+everything.  Unless you configure other policies, there&rsquo;s a one-to-one mapping between &ldquo;is authenticated&rdquo; and &ldquo;is
+authorized&rdquo;.</p>
+
+<p>The <code>AuthorizeAttribute</code> also takes a <code>Policy</code> parameter that allows you to authorize based on any named policy.  In the case
+of permissions authorization it should be straightforward to make a &ldquo;Permissions&rdquo; policy and specify it like this:</p>
+
+<pre><code class="language-C#">[Authorize(Policy=&quot;Permissions&quot;)]
+public IActionResult Get()
+{
+    /* do get-y stuff in here */
+}
+</code></pre>
+
+<p>Ah&hellip;except it&rsquo;s not that simple.  <em>What</em> permissions does a user need? First, let&rsquo;s back up and see how authorization
+policies work. Again, the documentation on this topic is really very good, so I strongly encourage you to read it for
+yourself.  However, I will try and summarize here.  Policies are implemented via &ldquo;Requirements&rdquo;, and with each requirement
+there must be at least one associated authorization handler.  The handlers determine whether or not their associated
+requirement is satisfied, and then finally the policy is satisfied if any requirement is met.</p>
+
+<p>The tricky part about permissions is that you don&rsquo;t know what permissions you need to check when the policy is defined, and
+polices aren&rsquo;t parameterizable.  All you can do is indicate in the attribute what policy to use, and then an
+<code>AuthorizationFilter</code> is added to that action, and the <code>AuthorizationFilter</code> evaluates the given policy (by evaluating each
+of its requirements until one succeeds or they all fail).</p>
+
+<p>The <code>AuthorizationFilter</code> makes use of a service that is registered for us when the Identity framework is configured: <code>IAuthorizationService</code>.
+This service allows a bit more control over what things are being evaluated, which is to our advantage.  Indeed, if you check out the
+<a href="https://docs.asp.net/en/latest/security/authorization/resourcebased.html#authorizing-within-your-code">Authorizing Within Your Code</a> section in the
+documentation, you&rsquo;ll see that the registered <code>IAuthorizationService</code> can be injected into controllers just like anything else, which allows
+you do evaluate policies and even requirements directly. This is the basis of resource authorization, actually.  The good news is that
+because the <code>IAuthorizationService</code> gives us more control, parameterization is no longer an issue:</p>
+
+<pre><code class="language-C#">public IActionResult Get()
+{
+    if (await _authorizationService.AuthorizeAsync(User, context, /* requirement or policy goes here */))
+    {
+        return View();
+    }
+    else
+    {
+        return ChallengeResult();
+    }
+}
+</code></pre>
+
+<p>Used like this, <code>IAuthorizationService</code> can clearly allow us to use whatever policy or requirement we want on a
+request-by-request basis.  Remember though: we wanted to do this in a declarative way using attributes.  My solution to this
+problem was to use the <code>TypeFilterAttribute</code>, which gives us access to the DI container.  My <a href="http://benjamincollins.com/blog/practical-permission-based-authorization-in-asp-net-core/#leveraging-dependency-injection:bc603b5d0602b8e850f1470fb6f73205">previous post</a>
+explained this technique adequately so I won&rsquo;t repeat it all here, but here&rsquo;s the code for the described technique that can
+give use a dependency-injected attribute like we wanted.</p>
+
+<pre><code class="language-C#">using System;
+using System.Threading.Tasks;
+using Microsoft.AspnetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Logging;
+
+using WebApplication.AspNetCore.Authorization;
+namspace WebApplication.AspNetCore.Mvc.Filters
+{
+    public class RequiresPermissionAttribute : TypeFilterAttribute
+    {
+        public RequiresPermissionAttribute(params Permission[] permissions)
+            : base(typeof(RequiresPermissionAttributeImpl))
+        {
+            Arguments = new[] { new PermissionAuthorizationRequirement(permissions) };
+        }
+
+        private class RequiresPermissionAttributeImpl : Attribute, IAsyncResourceFilter
+        {
+            private readonly ILogger _logger;
+            private readonly IAuthorizationService _authService;
+            private readonly PermissionAuthorizationRequirement _permissionRequirement;
+
+            public RequiresPermissionAttributeImpl(Ilogger&lt;RequiresPermissionAttribute&gt; logger,
+                                                   IAuthorizationService authService,
+                                                   PermissionAuthorizationRequirement permissionRequirement)
+            {
+                _logger = logger;
+                _authService = authService;
+                _permissionRequirement = permissionRequirement;
+            }
+
+            public async Task OnResourceExecutionAsync(ResourceExecuting context,
+                                                       ResourceExecutionDelegate next)
+            {
+                _logger.LogTrace(&quot;Executing RequiresPermissionAttributeImpl filter&quot;);
+
+                if (!await _authService.AuthorizeAsync(context.HttpContext.User,
+                                                       context.ActionDescriptor.ToString(),
+                                                       _permissionRequirement))
+                {
+                    context.Result = new ChallengeResult();
+                }
+                else
+                {
+                    await next();
+                }
+            }
+        }
+    }
+}
+</code></pre>
+
+<p>If you read this carefully, you&rsquo;ll see a couple of types that aren&rsquo;t explained here.<br />
+<a href="https://github.com/trinityrepublic/demo-authorization/blob/master/AspNetCore/Authorization/PermissionAuthorizationRequirement.cs"><code>PermissionAuthorizationRequirement</code></a>,
+explained in the previous post, and <code>PermissionAuthorizationHandler</code>, which I will explain here (and also can be
+<a href="https://github.com/trinityrepublic/demo-authorization/blob/master/AspNetCore/Authorization/PermissionAuthorizationHandler.cs">found on GitHub</a>):</p>
+
+<pre><code class="language-C#">using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspnetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
+using WebApplication.AspNetCore.Identity;
+using WebApplication.Models;
+
+namespace WebApplication.AspNetCore.Authorization
+{
+    public class PermissionAuthorizationHandler 
+        : AuthorizationHandler&lt;PermissionAuthorizationRequirement&gt;
+    {
+        private readonly ILogger _logger;
+        private readonly DemoUserManager&lt;ApplicationUser&gt; _userManager;
+
+        public PermissionAuthorizationHandler(Ilogger&lt;PermissionAuthorizationHandler&gt; logger,
+                                              DemoUserManager&lt;ApplicatioNUser&gt; userManager)
+        {
+            _logger = logger;
+            _userManager = userManager;
+        }
+
+        protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context,
+                                                             PermissionAuthorizationRequirement requirement)
+        {
+            var user = await _userManager.GetUserAsync(context.User);
+            var currentUserPermissions = await _userManager.GetUserPermissionsAsync(user);
+
+            var authorized = requirement.RequiredPermissions.AsParallel()
+                .All(rp =&gt; currentUserPermissions.Contains(rp));
+            if (authorized) context.Succeed(requirement);
+        }
+    }
+}
+</code></pre>
+
+<p>There are yet more types here that need explanation, but we&rsquo;ll be in the weeds really quickly if I try to explain everything
+in detail.  To summarize, I wrote a custom user manager so that I would be able to load permissions when I get a user from
+the identity framework.  Once I have a list of the current user&rsquo;s permissions, it&rsquo;s trivial to check to see if the required
+ones are in the list.  If the required permissions are found, then I mark the context as successful for this particular
+requirement.  This will cause the the call to <code>_authService.AuthorizeAsync(...)</code> up above in
+<code>RequiresPermissionAttributeImpl.OnResourceExecutionAsync</code> to return true, which means authorization succeeded, and our
+resource filter will allow the request to proceed through the action pipeline.</p>
+
+<h1 id="notes-about-wiring-things-up-in-startup-cs:edf38bf76e9397e52e908ae7737543bc">Notes about wiring things up in Startup.cs</h1>
+
+<p>One of the tricky things about getting ideas like this to work is connecting the pieces to the framework.  It seems very
+complicated when you&rsquo;re first learning it, but once you have a handle on it, it won&rsquo;t seem so complicated.</p>
+
+<h2 id="registering-the-custom-usermanager-for-the-identity-framework:edf38bf76e9397e52e908ae7737543bc">Registering the custom UserManager for the Identity Framework</h2>
+
+<p>In the <code>Startup</code> class, you&rsquo;ll need to configure the Identity framework to use the custom <code>UserManager</code>.  In this case, it&rsquo;s
+done in <code>ConfigureServices</code>:</p>
+
+<pre><code class="language-C#">public void ConfigureServices(IServiceCollection services)
+{
+    // ...
+
+    services.AddIdentity&lt;ApplicationUser&gt;, IdentityRole&gt;()
+            .AddEntityFrameworkStores&lt;ApplicationDbContext&gt;()
+            .AddUserManager&lt;DemoUserManager&lt;ApplicationUser&gt;&gt;() // &lt;--- right here!
+            .AddDefaultTokenProvider();
+
+    // ...
+}
+</code></pre>
+
+<h2 id="registering-handlers-for-the-custom-authorization-requirement:edf38bf76e9397e52e908ae7737543bc">Registering handlers for the custom authorization requirement</h2>
+
+<p>Just becauase you write a custom authorization requirement class doesn&rsquo;t mean much of anything, even if you reference it in
+the invocation to <code>IAuthorizationService.AuthorizeAsync()</code>.  You have to register a handler for it in the dependency
+injection container so the <code>IAuthorizationService</code> can look it up.  It matches the requirement types for you, so all you have
+to do is register the handler like anything else:</p>
+
+<pre><code class="language-C#">public void ConfigureServices(IServiceCollection services)
+{
+    // ...
+
+    services.AddScoped&lt;IAuthorizationHandler, PermissionAuthorizationHandler&gt;();
+
+    // ...
+}
+</code></pre>
+
+<p>If you&rsquo;ll remember from above, the handler inherits from <code>AuthorizationHandler&lt;PermissionAuthorizationRequirement&gt;</code>.  It has
+a generic type that matches the type of the requirement the handler handles, and the authorization service will match
+handlers based on that generic type.</p>
+
+<h1 id="wrap-up:edf38bf76e9397e52e908ae7737543bc">Wrap up</h1>
+
+<p>Of course, at this point the attribute can be used on a controller action:</p>
+
+<pre><code class="language-C#">[Authorize]
+public class MyController : Controller
+{
+    [RequiresPermission(Permissions.APermissionOfSomeKind)]
+    public IActionResult SomeAction()
+    {
+        // stuff
+    }
+}
+</code></pre>
+
+<p>I hope this clears up some gaps I left in the last post, and certainly check out my sample code:
+<a href="https://github.com/trinityrepublic/demo-authorization">trinityrepublic/demo-authorization</a>;</p>
+
+    </div>
+
+    <footer>
+        <ul class="stats">
+    
+        
+
+        
+        
+            <li>
+                
+                
+                    
+
+                    
+
+                    
+
+                    
+                        Categories
+                    
+                
+            </li>
+        
+    
+
+    
+    
+        <li><a href='http://benjamincollins.com/categories/asp.net-core'>asp.net core</a></li>
+    
+        <li><a href='http://benjamincollins.com/categories/security'>security</a></li>
+    
+</ul>
+
+    </footer>
+</article>
+<ul class="actions pagination">
+    
+        <li><a href="http://benjamincollins.com/blog/using-dependency-injection-while-configuring-services/"
+                class="button big previous">Using dependency injection while configuring services</a></li>
+    
+
+    
+        <li><a href="http://benjamincollins.com/blog/lets-chat-about-naming/"
+                class="button big next">Let&#39;s chat about naming</a></li>
+    
+</ul>
+
+
+
+    
+        <article class="post">
+            <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'bencollins';
+    var disqus_identifier = 'http:\/\/benjamincollins.com\/blog\/a-working-example-of-permissions-authorization\/';
+    var disqus_title = 'a working example of permissions authorization';
+    var disqus_url = 'http:\/\/benjamincollins.com\/blog\/a-working-example-of-permissions-authorization\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        </article>
+    
+
+
+    </div>
+    
+<section id="sidebar">
+
+    
+        <section id="intro">
+            
+            
+                
+                    <a href="http://benjamincollins.com/" class="logo"><img src="http://benjamincollins.com/img/main/logo.jpg" alt="Just me" /></a>
+                
+            
+            
+                <header>
+                    <h2>Ben Collins</h2>
+                    <p>Spirit and Silicon</p>
+                </header>
+            
+            <ul class="icons">
+                
+                
+                    
+<li><a href="//github.com/aggieben" target="_blank" title="GitHub" class="fa fa-github"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//medium.com/@aggieben" target="_blank" title="Medium" class="fa fa-medium"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//stackoverflow.com/users/3279" target="_blank" title="Stack Overflow" class="fa fa-stack-overflow"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//twitter.com/aggieben" target="_blank" title="Twitter" class="fa fa-twitter"></a></li>
+
+
+
+<li><a href="mailto:aggieben@gmail.com" title="Email" class="fa fa-envelope"></a></li>
+
+
+                
+            </ul>
+        </section>
+
+    
+        <section id="recent-posts">
+            <ul class="posts">
+                <header>
+                    <h3>Recent Posts</h3>
+                </header>
+                
+                    
+                
+
+                
+                    
+                
+
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="http://benjamincollins.com/blog/lets-chat-about-naming/">Let&#39;s chat about naming</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2016-11-02'>
+                                    November 2, 2016</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="http://benjamincollins.com/blog/a-working-example-of-permissions-authorization/">a working example of permissions authorization</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2016-10-20'>
+                                    October 20, 2016</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="http://benjamincollins.com/blog/using-dependency-injection-while-configuring-services/">Using dependency injection while configuring services</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2016-08-09'>
+                                    August 9, 2016</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="http://benjamincollins.com/blog/practical-permission-based-authorization-in-asp-net-core/">Practical Permissions-based Authorization in ASP.NET Core MVC</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2016-08-08'>
+                                    August 8, 2016</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="http://benjamincollins.com/blog/an-integration-testing-nightmare/">an integration testing nightmare</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2016-05-12'>
+                                    May 12, 2016</time>
+                            </header>
+                        </article>
+                    </li>
+                
+
+                
+                    <li>
+                        <ul class="actions">
+                            <li><a href=
+                            
+                                /blog/
+                            
+                            class="button">View more posts</a></li>
+                        </ul>
+                    </li>
+                
+            </ul>
+        </section>
+
+    
+    
+    
+    
+        <section id="categories">
+            <ul class="posts">
+                <header>
+                    <h3><a href="http://benjamincollins.com/categories/">Categories</a></h3>
+                </header>
+
+                
+                    
+                
+
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="http://benjamincollins.com/categories/asp.net-core/">asp.net core</a>
+                                <span style="float:right;">4</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="http://benjamincollins.com/categories/security/">security</a>
+                                <span style="float:right;">2</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="http://benjamincollins.com/categories/remote-working/">remote-working</a>
+                                <span style="float:right;">2</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="http://benjamincollins.com/categories/crosspost/">crosspost</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="http://benjamincollins.com/categories/azure/">azure</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="http://benjamincollins.com/categories/hugo/">hugo</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="http://benjamincollins.com/categories/reviews-starwars-sci-fi/">reviews starwars sci-fi</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="http://benjamincollins.com/categories/programming/">programming</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="http://benjamincollins.com/categories/node/">node</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="http://benjamincollins.com/categories/politics/">politics</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="http://benjamincollins.com/categories/christianity/">christianity</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+            </ul>
+        </section>
+    
+
+    
+        
+        <section class="blurb">
+            <h2>About</h2>
+            <p> I&#39;m a builder.  I love building things.  Mostly, I love
+    building useful software.  I build in C#, Lisp, F#, C, C&#43;&#43;, Javascript
+    (although I&#39;m investing more in transpilers like Fable or TypeScript).  I
+    also am a committed, lifelong learner.  I&#39;m currently learning about machine
+    learning, Edison programming (IoT), as well as studying my existing skills
+    more deeply.</p>
+
+            <ul class="actions">
+                <li><a href="http://benjamincollins.com/about/" class="button">Learn More</a></li>
+            </ul>
+        </section>
+        
+
+    
+        <section id="footer">
+            <ul class="icons">
+                
+                
+                    
+<li><a href="//github.com/aggieben" target="_blank" title="GitHub" class="fa fa-github"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//medium.com/@aggieben" target="_blank" title="Medium" class="fa fa-medium"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//stackoverflow.com/users/3279" target="_blank" title="Stack Overflow" class="fa fa-stack-overflow"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//twitter.com/aggieben" target="_blank" title="Twitter" class="fa fa-twitter"></a></li>
+
+
+
+<li><a href="mailto:aggieben@gmail.com" title="Email" class="fa fa-envelope"></a></li>
+
+
+                
+            </ul>
+
+            <p class="copyright">&copy; Ben Collins. Design: <a href="http://html5up.net" target="_blank">HTML5 UP</a>. Ported by <a href="//github.com/jpescador" target="_blank">Julio Pescador</a>. Powered by <a href="//gohugo.io" target="_blank">Hugo</a></p>
+        </section>
+
+</section>
+
+            </div>
+        <a id="back-to-top" href="#" class="fa fa-arrow-up fa-border fa-2x"></a>
+        
+
+        
+        
+            
+        
+
+        
+        
+
+        
+            
+                
+                    <script src="http://benjamincollins.com/js/main.min.js"></script>
+                
+            
+        
+
+            
+            <script>hljs.initHighlightingOnLoad();</script>
+            
+    </body>
+</html>
+

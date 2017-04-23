@@ -9,10 +9,14 @@
     <Content Include="any\netstandard1.6\FSharp.Core.sigdata">
       <Paket>True</Paket>
     </Content>
+    <Content Include="html\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Compile Include="**/*.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\BitThicket.Concull.Feeds\BitThicket.Concull.Feeds.fsproj" />
+    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.0-beta1-build3642"/>
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
