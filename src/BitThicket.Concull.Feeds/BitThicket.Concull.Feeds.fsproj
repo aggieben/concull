@@ -10,6 +10,7 @@
       <Paket>True</Paket>
     </Content>
     <Compile Include="Web.fs" />
+    <Compile Include="Syndication.fs" />
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.0-*" />
