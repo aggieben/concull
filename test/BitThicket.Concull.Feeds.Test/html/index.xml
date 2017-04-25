@@ -1,0 +1,1268 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ben Collins</title>
+    <link>http://benjamincollins.com/</link>
+    <description>Recent content on Ben Collins</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 02 Nov 2016 21:05:41 -0500</lastBuildDate>
+    <atom:link href="http://benjamincollins.com/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Let&#39;s chat about naming</title>
+      <link>http://benjamincollins.com/blog/lets-chat-about-naming/</link>
+      <pubDate>Wed, 02 Nov 2016 21:05:41 -0500</pubDate>
+      
+      <guid>http://benjamincollins.com/blog/lets-chat-about-naming/</guid>
+      <description>&lt;p&gt;Hello there, developer.  Come, sit down with me.  We need to have a talk.&lt;/p&gt;
+
+&lt;p&gt;A famous saying in our industry goes something like this:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;There are two hard problems in computer science: cache invalidation, naming things, and off-by-one errors&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;(&lt;em&gt;rimshot&lt;/em&gt;)&lt;/p&gt;
+
+&lt;p&gt;There are a few guidelines we should be keeping in mind as we name things:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Grammatical correctness.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;The humor is in the off-by-one irony of course, and we accept uncritically that naming things is hard.  I suppose in some
+way it can be challenging, but it shouldn&amp;rsquo;t be any more challenging than being able to write coherently.  Names give
+meaning to the surrounding context; ergo, grammatically and conceptually correct names make the context that much
+clearer.  In my opinion, sensible (and &lt;em&gt;correct&lt;/em&gt;) naming is an important part of writing much-vaunted &amp;ldquo;semantic code.&amp;rdquo;&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Consistency&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;If there is more than one correct way of naming something, then the goal should be consistency.  If you call something
+that handles CRUD operations for a data type a &amp;ldquo;SomethingManager&amp;rdquo;, then all the things that do that should be called
+&amp;ldquo;Manager&amp;rdquo;.  Likewise, if it&amp;rsquo;s a &amp;ldquo;Service&amp;rdquo;, then anything like that should also be a Service.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Essentialness&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Please, please, please: do not be redundant.  Consider if the components of the name you are using are essential to the
+conveying the notion of the thing you&amp;rsquo;re naming.  We don&amp;rsquo;t need &lt;code&gt;WebThingsLibrary.WebThings.WebThingType&lt;/code&gt; and the like.&lt;br /&gt;
+Better: &lt;code&gt;WebThingsLibrary.WebThings.Type&lt;/code&gt;.  Even better: &lt;code&gt;WebThings.Type&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;The flip side of this same coin: are you providing enough?  Is the acronym you want to use a universally understood one?
+Is the abbreviation you&amp;rsquo;re using universally understood?  &lt;code&gt;UserId&lt;/code&gt; is fine: everyone knows that &lt;code&gt;Id&lt;/code&gt; means identifier (or
+maybe identification).  Loop variables, and perhaps one-line lambda functions are an exception at times.&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Please, guys and gals, make it easier on your future selves (and the rest of us).&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>a working example of permissions authorization</title>
+      <link>http://benjamincollins.com/blog/a-working-example-of-permissions-authorization/</link>
+      <pubDate>Thu, 20 Oct 2016 21:50:06 -0500</pubDate>
+      
+      <guid>http://benjamincollins.com/blog/a-working-example-of-permissions-authorization/</guid>
+      <description>
+
+&lt;h1 id=&#34;motivation:edf38bf76e9397e52e908ae7737543bc&#34;&gt;Motivation&lt;/h1&gt;
+
+&lt;p&gt;In my previous post, &lt;a href=&#34;http://benjamincollins.com/blog/practical-permission-based-authorization-in-asp-net-core/&#34;&gt;Practical Permission-based Authorization in ASP.NET Core&lt;/a&gt;, I tried to demonstrate how to implement a regime of
+permissions-based authorization without having to stuff it all into an ever-exploding list of roles, without abusing claims,
+and without having to roll your own framework-fighting implementation.  Resource filters allow you to do this elegantly and
+still remain in harmony with the framework.&lt;/p&gt;
+
+&lt;p&gt;However, I may have been too terse.  I got a couple questions and a request for a working example, which seemed like a
+reasonable request, so that what this post is about.  Part of what I realized I needed to do is fill in a bunch of gaps about
+which I assumed the reader&amp;rsquo;s &lt;em&gt;a priori&lt;/em&gt; knowledge.  That was a mistake, and so this post will go into more detail about how
+all this stuff works.&lt;/p&gt;
+
+&lt;p&gt;The code is available at GitHub: &lt;a href=&#34;https://github.com/trinityrepublic/demo-authorization&#34;&gt;trinityrepublic/demo-authorization&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h1 id=&#34;overview:edf38bf76e9397e52e908ae7737543bc&#34;&gt;Overview&lt;/h1&gt;
+
+&lt;p&gt;First things first.  In the other post, I linked to the ASP.NET Core documentation, but maybe I didn&amp;rsquo;t lean into that as
+aggressively as I should have.  If you have not at least read the section called
+&lt;a href=&#34;https://docs.asp.net/en/latest/mvc/controllers/filters.html#how-do-filters-work&#34;&gt;How do filters work?&lt;/a&gt;,
+then you stand a good chance of not following this.  Go on, right now. Read it.  It will take you 2 minutes, and this post
+is just a back-button click away.&lt;/p&gt;
+
+&lt;p&gt;I&amp;rsquo;ve used the default web project template from the CLI tooling (&lt;code&gt;1.0.0-preview2-003133&lt;/code&gt;).  It uses the ASP.NET Identity
+framework to manage authentication (remember, &lt;a href=&#34;http://stackoverflow.com/a/6556548/3279&#34;&gt;authentication is not the same as authorization&lt;/a&gt;).
+Permissions are an &lt;em&gt;authorization&lt;/em&gt; concern.  So we&amp;rsquo;re going to let Identity handle &lt;em&gt;authentication&lt;/em&gt; for us using the defaults.&lt;/p&gt;
+
+&lt;p&gt;You&amp;rsquo;ll see the following in &lt;code&gt;Startup.cs&lt;/code&gt; (with a bunch of stuff omitted&amp;hellip;)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-C#&#34;&gt;namespace WebApplication
+{
+    public class Startup
+    {
+        public Startup(IHostingEnvironment env)
+        {
+            /* stuff */
+        }
+
+        public IConfigurationRoot Configuration { get; }
+
+        public void ConfigureServices(IServiceCollection services)
+        {
+            /* stuff */
+        }
+
+        public void Configure(IApplicationBuilder app, 
+                              IHostingEnvironment env, 
+                              ILoggerFactory loggerFactory)
+        {
+            loggerFactory.AddConsole(Configuration.GetSection(&amp;quot;Logging&amp;quot;));
+            loggerFactory.AddDebug();
+
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                app.UseDatabaseErrorPage();
+                app.UseBrowserLink();
+            }
+            else
+            {
+                app.UseExceptionHandler(&amp;quot;/Home/Error&amp;quot;);
+            }
+
+            app.UseStaticFiles();
+
+            // ************** THE IMPORTANT PART OF THIS SNIPPET *****************
+            app.UseIdentity();
+            // *******************************************************************
+
+            app.UseMvc(routes =&amp;gt;
+            {
+                routes.MapRoute(
+                    name: &amp;quot;default&amp;quot;,
+                    template: &amp;quot;{controller=Home}/{action=Index}/{id?}&amp;quot;
+                )
+            });
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The indicated line above, &lt;code&gt;app.UseIdentity()&lt;/code&gt;, is an &lt;code&gt;IApplicationBuilder&lt;/code&gt; extension method provided by the Identity
+framework. You can &lt;a href=&#34;https://github.com/aspnet/Identity/blob/dev/src/Microsoft.AspNetCore.Identity/BuilderExtensions.cs&#34;&gt;see for yourself what it does&lt;/a&gt;, but for our
+purposes what you really need to know is that it registers cookie authentication (using similar builder extension methods),
+which in turn register &lt;code&gt;CookieAuthenticationMiddleware&lt;/code&gt;, which in turn registers the &lt;code&gt;CookieAuthenticationHandler&lt;/code&gt;, which is
+the class that does the actual authentication for us.&lt;/p&gt;
+
+&lt;p&gt;This (and any) authentication handler will do the work to figure out if a user&amp;rsquo;s claims about their identity are valid.  If
+so, then the handler will mark this particular identity as authenticated.  So just to be extra clear: whether or not a user
+is &lt;em&gt;authenticated&lt;/em&gt; is always a binary question.  Yes, or no.  True or false.&lt;/p&gt;
+
+&lt;h1 id=&#34;details:edf38bf76e9397e52e908ae7737543bc&#34;&gt;Details&lt;/h1&gt;
+
+&lt;p&gt;Now to authorization.  In ASP.NET Core, rather than the old membership system in which users could be placed in roles and
+authorization granted based on membership in a role, authorization is built on &amp;ldquo;policies&amp;rdquo;.  Role membership is a
+pre-configured policy and is still supported (see &lt;a href=&#34;https://docs.asp.net/en/latest/security/authorization/roles.html&#34;&gt;Role based Authorization&lt;/a&gt;), but the framework allows you to define
+arbitrary policies, which gives us a &lt;em&gt;lot&lt;/em&gt; more flexibility in how we authorize our users.  But wait!  Weren&amp;rsquo;t we just
+talking about authentication?  Yes - and here&amp;rsquo;s the link: the default authorization policy configured in ASP.NET Core is to
+test for authentication.  That&amp;rsquo;s why when you first start a new application you slap the &lt;code&gt;[Authorize]&lt;/code&gt; attribute on
+everything.  Unless you configure other policies, there&amp;rsquo;s a one-to-one mapping between &amp;ldquo;is authenticated&amp;rdquo; and &amp;ldquo;is
+authorized&amp;rdquo;.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code&gt;AuthorizeAttribute&lt;/code&gt; also takes a &lt;code&gt;Policy&lt;/code&gt; parameter that allows you to authorize based on any named policy.  In the case
+of permissions authorization it should be straightforward to make a &amp;ldquo;Permissions&amp;rdquo; policy and specify it like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-C#&#34;&gt;[Authorize(Policy=&amp;quot;Permissions&amp;quot;)]
+public IActionResult Get()
+{
+    /* do get-y stuff in here */
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Ah&amp;hellip;except it&amp;rsquo;s not that simple.  &lt;em&gt;What&lt;/em&gt; permissions does a user need? First, let&amp;rsquo;s back up and see how authorization
+policies work. Again, the documentation on this topic is really very good, so I strongly encourage you to read it for
+yourself.  However, I will try and summarize here.  Policies are implemented via &amp;ldquo;Requirements&amp;rdquo;, and with each requirement
+there must be at least one associated authorization handler.  The handlers determine whether or not their associated
+requirement is satisfied, and then finally the policy is satisfied if any requirement is met.&lt;/p&gt;
+
+&lt;p&gt;The tricky part about permissions is that you don&amp;rsquo;t know what permissions you need to check when the policy is defined, and
+polices aren&amp;rsquo;t parameterizable.  All you can do is indicate in the attribute what policy to use, and then an
+&lt;code&gt;AuthorizationFilter&lt;/code&gt; is added to that action, and the &lt;code&gt;AuthorizationFilter&lt;/code&gt; evaluates the given policy (by evaluating each
+of its requirements until one succeeds or they all fail).&lt;/p&gt;
+
+&lt;p&gt;The &lt;code&gt;AuthorizationFilter&lt;/code&gt; makes use of a service that is registered for us when the Identity framework is configured: &lt;code&gt;IAuthorizationService&lt;/code&gt;.
+This service allows a bit more control over what things are being evaluated, which is to our advantage.  Indeed, if you check out the
+&lt;a href=&#34;https://docs.asp.net/en/latest/security/authorization/resourcebased.html#authorizing-within-your-code&#34;&gt;Authorizing Within Your Code&lt;/a&gt; section in the
+documentation, you&amp;rsquo;ll see that the registered &lt;code&gt;IAuthorizationService&lt;/code&gt; can be injected into controllers just like anything else, which allows
+you do evaluate policies and even requirements directly. This is the basis of resource authorization, actually.  The good news is that
+because the &lt;code&gt;IAuthorizationService&lt;/code&gt; gives us more control, parameterization is no longer an issue:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-C#&#34;&gt;public IActionResult Get()
+{
+    if (await _authorizationService.AuthorizeAsync(User, context, /* requirement or policy goes here */))
+    {
+        return View();
+    }
+    else
+    {
+        return ChallengeResult();
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Used like this, &lt;code&gt;IAuthorizationService&lt;/code&gt; can clearly allow us to use whatever policy or requirement we want on a
+request-by-request basis.  Remember though: we wanted to do this in a declarative way using attributes.  My solution to this
+problem was to use the &lt;code&gt;TypeFilterAttribute&lt;/code&gt;, which gives us access to the DI container.  My &lt;a href=&#34;http://benjamincollins.com/blog/practical-permission-based-authorization-in-asp-net-core/#leveraging-dependency-injection:bc603b5d0602b8e850f1470fb6f73205&#34;&gt;previous post&lt;/a&gt;
+explained this technique adequately so I won&amp;rsquo;t repeat it all here, but here&amp;rsquo;s the code for the described technique that can
+give use a dependency-injected attribute like we wanted.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-C#&#34;&gt;using System;
+using System.Threading.Tasks;
+using Microsoft.AspnetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Logging;
+
+using WebApplication.AspNetCore.Authorization;
+namspace WebApplication.AspNetCore.Mvc.Filters
+{
+    public class RequiresPermissionAttribute : TypeFilterAttribute
+    {
+        public RequiresPermissionAttribute(params Permission[] permissions)
+            : base(typeof(RequiresPermissionAttributeImpl))
+        {
+            Arguments = new[] { new PermissionAuthorizationRequirement(permissions) };
+        }
+
+        private class RequiresPermissionAttributeImpl : Attribute, IAsyncResourceFilter
+        {
+            private readonly ILogger _logger;
+            private readonly IAuthorizationService _authService;
+            private readonly PermissionAuthorizationRequirement _permissionRequirement;
+
+            public RequiresPermissionAttributeImpl(Ilogger&amp;lt;RequiresPermissionAttribute&amp;gt; logger,
+                                                   IAuthorizationService authService,
+                                                   PermissionAuthorizationRequirement permissionRequirement)
+            {
+                _logger = logger;
+                _authService = authService;
+                _permissionRequirement = permissionRequirement;
+            }
+
+            public async Task OnResourceExecutionAsync(ResourceExecuting context,
+                                                       ResourceExecutionDelegate next)
+            {
+                _logger.LogTrace(&amp;quot;Executing RequiresPermissionAttributeImpl filter&amp;quot;);
+
+                if (!await _authService.AuthorizeAsync(context.HttpContext.User,
+                                                       context.ActionDescriptor.ToString(),
+                                                       _permissionRequirement))
+                {
+                    context.Result = new ChallengeResult();
+                }
+                else
+                {
+                    await next();
+                }
+            }
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you read this carefully, you&amp;rsquo;ll see a couple of types that aren&amp;rsquo;t explained here.&lt;br /&gt;
+&lt;a href=&#34;https://github.com/trinityrepublic/demo-authorization/blob/master/AspNetCore/Authorization/PermissionAuthorizationRequirement.cs&#34;&gt;&lt;code&gt;PermissionAuthorizationRequirement&lt;/code&gt;&lt;/a&gt;,
+explained in the previous post, and &lt;code&gt;PermissionAuthorizationHandler&lt;/code&gt;, which I will explain here (and also can be
+&lt;a href=&#34;https://github.com/trinityrepublic/demo-authorization/blob/master/AspNetCore/Authorization/PermissionAuthorizationHandler.cs&#34;&gt;found on GitHub&lt;/a&gt;):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-C#&#34;&gt;using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspnetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
+using WebApplication.AspNetCore.Identity;
+using WebApplication.Models;
+
+namespace WebApplication.AspNetCore.Authorization
+{
+    public class PermissionAuthorizationHandler 
+        : AuthorizationHandler&amp;lt;PermissionAuthorizationRequirement&amp;gt;
+    {
+        private readonly ILogger _logger;
+        private readonly DemoUserManager&amp;lt;ApplicationUser&amp;gt; _userManager;
+
+        public PermissionAuthorizationHandler(Ilogger&amp;lt;PermissionAuthorizationHandler&amp;gt; logger,
+                                              DemoUserManager&amp;lt;ApplicatioNUser&amp;gt; userManager)
+        {
+            _logger = logger;
+            _userManager = userManager;
+        }
+
+        protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context,
+                                                             PermissionAuthorizationRequirement requirement)
+        {
+            var user = await _userManager.GetUserAsync(context.User);
+            var currentUserPermissions = await _userManager.GetUserPermissionsAsync(user);
+
+            var authorized = requirement.RequiredPermissions.AsParallel()
+                .All(rp =&amp;gt; currentUserPermissions.Contains(rp));
+            if (authorized) context.Succeed(requirement);
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;There are yet more types here that need explanation, but we&amp;rsquo;ll be in the weeds really quickly if I try to explain everything
+in detail.  To summarize, I wrote a custom user manager so that I would be able to load permissions when I get a user from
+the identity framework.  Once I have a list of the current user&amp;rsquo;s permissions, it&amp;rsquo;s trivial to check to see if the required
+ones are in the list.  If the required permissions are found, then I mark the context as successful for this particular
+requirement.  This will cause the the call to &lt;code&gt;_authService.AuthorizeAsync(...)&lt;/code&gt; up above in
+&lt;code&gt;RequiresPermissionAttributeImpl.OnResourceExecutionAsync&lt;/code&gt; to return true, which means authorization succeeded, and our
+resource filter will allow the request to proceed through the action pipeline.&lt;/p&gt;
+
+&lt;h1 id=&#34;notes-about-wiring-things-up-in-startup-cs:edf38bf76e9397e52e908ae7737543bc&#34;&gt;Notes about wiring things up in Startup.cs&lt;/h1&gt;
+
+&lt;p&gt;One of the tricky things about getting ideas like this to work is connecting the pieces to the framework.  It seems very
+complicated when you&amp;rsquo;re first learning it, but once you have a handle on it, it won&amp;rsquo;t seem so complicated.&lt;/p&gt;
+
+&lt;h2 id=&#34;registering-the-custom-usermanager-for-the-identity-framework:edf38bf76e9397e52e908ae7737543bc&#34;&gt;Registering the custom UserManager for the Identity Framework&lt;/h2&gt;
+
+&lt;p&gt;In the &lt;code&gt;Startup&lt;/code&gt; class, you&amp;rsquo;ll need to configure the Identity framework to use the custom &lt;code&gt;UserManager&lt;/code&gt;.  In this case, it&amp;rsquo;s
+done in &lt;code&gt;ConfigureServices&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-C#&#34;&gt;public void ConfigureServices(IServiceCollection services)
+{
+    // ...
+
+    services.AddIdentity&amp;lt;ApplicationUser&amp;gt;, IdentityRole&amp;gt;()
+            .AddEntityFrameworkStores&amp;lt;ApplicationDbContext&amp;gt;()
+            .AddUserManager&amp;lt;DemoUserManager&amp;lt;ApplicationUser&amp;gt;&amp;gt;() // &amp;lt;--- right here!
+            .AddDefaultTokenProvider();
+
+    // ...
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;registering-handlers-for-the-custom-authorization-requirement:edf38bf76e9397e52e908ae7737543bc&#34;&gt;Registering handlers for the custom authorization requirement&lt;/h2&gt;
+
+&lt;p&gt;Just becauase you write a custom authorization requirement class doesn&amp;rsquo;t mean much of anything, even if you reference it in
+the invocation to &lt;code&gt;IAuthorizationService.AuthorizeAsync()&lt;/code&gt;.  You have to register a handler for it in the dependency
+injection container so the &lt;code&gt;IAuthorizationService&lt;/code&gt; can look it up.  It matches the requirement types for you, so all you have
+to do is register the handler like anything else:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-C#&#34;&gt;public void ConfigureServices(IServiceCollection services)
+{
+    // ...
+
+    services.AddScoped&amp;lt;IAuthorizationHandler, PermissionAuthorizationHandler&amp;gt;();
+
+    // ...
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you&amp;rsquo;ll remember from above, the handler inherits from &lt;code&gt;AuthorizationHandler&amp;lt;PermissionAuthorizationRequirement&amp;gt;&lt;/code&gt;.  It has
+a generic type that matches the type of the requirement the handler handles, and the authorization service will match
+handlers based on that generic type.&lt;/p&gt;
+
+&lt;h1 id=&#34;wrap-up:edf38bf76e9397e52e908ae7737543bc&#34;&gt;Wrap up&lt;/h1&gt;
+
+&lt;p&gt;Of course, at this point the attribute can be used on a controller action:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-C#&#34;&gt;[Authorize]
+public class MyController : Controller
+{
+    [RequiresPermission(Permissions.APermissionOfSomeKind)]
+    public IActionResult SomeAction()
+    {
+        // stuff
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I hope this clears up some gaps I left in the last post, and certainly check out my sample code:
+&lt;a href=&#34;https://github.com/trinityrepublic/demo-authorization&#34;&gt;trinityrepublic/demo-authorization&lt;/a&gt;;&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Using dependency injection while configuring services</title>
+      <link>http://benjamincollins.com/blog/using-dependency-injection-while-configuring-services/</link>
+      <pubDate>Tue, 09 Aug 2016 22:49:27 -0500</pubDate>
+      
+      <guid>http://benjamincollins.com/blog/using-dependency-injection-while-configuring-services/</guid>
+      <description>&lt;p&gt;ASP.NET Core applications are configured using the &lt;code&gt;Configure&lt;/code&gt; and optionally,
+the &lt;code&gt;ConfigureServices&lt;/code&gt; methods of the startup class (typically &lt;code&gt;Startup&lt;/code&gt;).
+&lt;code&gt;ConfigureServices&lt;/code&gt; is used to set up the dependency injection container that
+ships with ASP.NET Core.  The method signature looks like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public void ConfigureServices(IServiceCollection services);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;That &lt;code&gt;IServiceCollection&lt;/code&gt; instance is the developer&amp;rsquo;s surface area for
+configuring dependencies.&lt;/p&gt;
+
+&lt;p&gt;Mvc can be configured like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class Startup
+{
+  // ...
+  public void ConfigureServices(IServiceCollection services)
+  {
+    // ...
+    services.AddMvc();
+    // ...
+  }
+  // ...
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The extension methods offered by Mvc also allow you do do more than just apply
+the default configuration.  There is also a method like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public static IMvcBuilder AddMvc(this IServiceCollection services, Action&amp;lt;MvcOptions&amp;gt; setupAction);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You can pass an anonymous function for the &lt;code&gt;setupAction&lt;/code&gt; parameter, so you
+can do things like &lt;code&gt;services.AddMvc(options =&amp;gt; /* do stuff with MvcOptions */)&lt;/code&gt;.
+In my case, I wanted to add a default authorization filter globally, using the
+&lt;code&gt;MvcOptions.Filters&lt;/code&gt; property.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public void ConfigureServices(IServiceCollection services)
+{
+  // ...
+  services.AddMvc(options =&amp;gt; {
+    options.Filers.Add(new AuthorizeFilter(/* uh....how do I get the default policy??? */));
+  });
+  // ...
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;As you might be able to guess from the above, &lt;code&gt;AuthorizeFilter&lt;/code&gt; requires a
+policy in the constructor. Unfortunately, there wasn&amp;rsquo;t a straightforward way to
+get the configured default authorization policy.  I&amp;rsquo;ve seen this problem before
+with other things that need configuring.  Sometimes you just need to know about
+other stuff that&amp;rsquo;s been configured without resorting to brittle hacks - but you
+can&amp;rsquo;t get direct access to the DI container in the context of the
+&lt;code&gt;ConfigureServices&lt;/code&gt; method because the container hasn&amp;rsquo;t been built yet!  What we
+really need is a way to declare a deferred configuration that would get the
+benefit of injected dependencies.&lt;/p&gt;
+
+&lt;p&gt;Fortunately, ASP.NET Core does include such a mechanism.  It&amp;rsquo;s part of the
+Options &amp;ldquo;sub-framework&amp;rdquo;.  What you have to do is implement
+&lt;code&gt;IConfigureOptions&amp;lt;TOptions&amp;gt;&lt;/code&gt; for whatever &lt;code&gt;TOptions&lt;/code&gt; you need to configure, and
+then add that to the container.  When the Options framework invokes all of its
+configurations, it will resolve classes of type &lt;code&gt;IConfigureOptions&amp;lt;&amp;gt;&lt;/code&gt; and then
+invoke the &lt;code&gt;Configure&lt;/code&gt; method on them.  In my case, the solution
+was to write the following class and wire up a singleton to the DI container:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;class MvcConfiguration : IConfigureOptions&amp;lt;MvcOptions&amp;gt;
+{
+  private reaodnly IOptions&amp;lt;AuthorizationOptions&amp;gt; _authOptions;
+  public MvcConfiguration(IOption&amp;lt;AuthorizationOptions&amp;gt; authOptions)
+  {
+    _authOptions = authOptions;
+  }
+
+  public void Configure(MvcOptions options)
+  {
+    options.Filters.Add(new AuthorizeFilter(_authOptions.Value.DefaultPolicy));
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Conveniently, the Options framework will just apply this configuration along
+with whatever else you have configured elsewhere, so you can do more complex
+things (that require injected dependencies) in your &lt;code&gt;IConfigureOptions&lt;/code&gt; class
+and still do simpler configuration for Mvc up in &lt;code&gt;ConfigureServices&lt;/code&gt;.  The
+configurations will stack.&lt;/p&gt;
+
+&lt;p&gt;My &lt;code&gt;ConfigureServices&lt;/code&gt; method now looks like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public void ConfigureServices(IServiceCollection services)
+{
+  // ...
+  services.AddMvc(); // configures the defaults, including default AuthorizationOptions
+  services.AddSingleton&amp;lt;IConfigureOptions&amp;lt;MvcOptions&amp;gt;, MvcConfiguration&amp;gt;(); // my additional configuration
+  // ...
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Thanks to Derek Gray (@tuespetre in the aspnetcore slack) for discussion that
+led me here.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Practical Permissions-based Authorization in ASP.NET Core MVC</title>
+      <link>http://benjamincollins.com/blog/practical-permission-based-authorization-in-asp-net-core/</link>
+      <pubDate>Mon, 08 Aug 2016 22:55:37 -0500</pubDate>
+      
+      <guid>http://benjamincollins.com/blog/practical-permission-based-authorization-in-asp-net-core/</guid>
+      <description>
+
+&lt;h1 id=&#34;the-new-identity-framework:bc603b5d0602b8e850f1470fb6f73205&#34;&gt;The New Identity framework&lt;/h1&gt;
+
+&lt;p&gt;As anyone following ASP.NET&amp;rsquo;s development in the last two years knows, ASP.NET Core has been released and there are a lot of changes.  Gone are the days of IIS modules and handlers and the traditional ASP.NET pipeline.  Instead, now we have a composable pipeline of delegates.  Gone also are &lt;code&gt;System.Web&lt;/code&gt; and much of the monolithic frameworks that often were used in web applications.  The Identity framework is one that has also changed.  Before ASP.NET Core, the Identity framework supported Membership and Roles, where a user could have membership in a given role, and then authorization could be accomplished based on roles.  More recently (but also before ASP.NET Core), Identity supported Claims.  In the new Identity framework, policy-based authorization was introduced.  Policy-based authorization allows for a great deal of flexibility by giving developers a high-level and well-defined way to integrate custom authorization mechanisms into the Identity framework.  Read more about &lt;a href=&#34;https://docs.asp.net/en/latest/security/authorization/policies.html#custom-policy-based-authorization&#34;&gt;policy-based authorization on the ASP.NET Core documentation page&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h1 id=&#34;resource-based-authorization:bc603b5d0602b8e850f1470fb6f73205&#34;&gt;Resource-based Authorization&lt;/h1&gt;
+
+&lt;p&gt;In this new, more flexible authorization landscape, Identity also supports the idea of &amp;ldquo;resource-based&amp;rdquo; authorization, or in other words, authorization that only applies to a specific web resource.  To re-use the example shown in &lt;a href=&#34;https://docs.asp.net/en/latest/security/authorization/resourcebased.html#resource-based-authorization&#34;&gt;the documentation&lt;/a&gt;, imagine you have a &amp;ldquo;documents&amp;rdquo; resource in your application (be in API or user-facing web app, it doesn&amp;rsquo;t matter), where editing is a privileged action:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-c#&#34;&gt;public class DocumentController : Controller
+{
+    private readonly IAuthorizationService _authSvc;
+    private readonly IDocumentRepository _docRepo;
+
+    public DocumentController(IAuthorizationService authSvc, IDocumentRepository docRepo)
+    {
+        _authSvc = authSvc;
+        _docRepo = docRepo;
+    }
+
+    public async Task&amp;lt;IActionResult&amp;gt; Edit(Guid docId)
+    {
+        var doc = docRepo.Find(docId); // var is type Document
+
+        if (await _authSvc.AuthorizeAsync(User, doc, Operations.Update))
+        {
+            return View(doc);
+        }
+        else
+        {
+            return Challenge();
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://docs.asp.net/en/latest/security/authorization/policies.html#custom-policy-based-authorization&#34;&gt;The documentation&lt;/a&gt; ably explains the mechanics of what&amp;rsquo;s going on here, but this is the basis of how you might authorize particular actions.&lt;/p&gt;
+
+&lt;h1 id=&#34;permissions:bc603b5d0602b8e850f1470fb6f73205&#34;&gt;Permissions&lt;/h1&gt;
+
+&lt;p&gt;In my application, we have a more complicated authorization model than what can easily be represented by the &lt;code&gt;Microsoft.AspNetCore.Authorization.Infrastructure.OperationAuthorizationRequirement&lt;/code&gt; class.  We have a fairly complex permissions hierarchy that correspond to various features of the application, some of which are quite fine-grained.  At last count, we have 83 specific permissions, and there are many features on our roadmap left to be implemented.  We could use the &lt;code&gt;OperationAuthorizationRequirement&lt;/code&gt; class, but we would have a great many instances of this class to create and name.  While this might be not-terrible for some uses, we also need to be able to represent &lt;em&gt;combinations&lt;/em&gt; of our permissions to represent &amp;ldquo;effective permissions&amp;rdquo;.  It seemed to me that a requirement-per-effective-permission was not going to be practical because the list would already be unwieldy and error prone, and only get worse and quickly.  Instead, I needed to write a parameterized requirement like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-c#&#34;&gt;public class PermissionsAuthorizationRequirement : IAuthorizationRequirement
+{
+    public IEnumerable&amp;lt;Permission&amp;gt; RequiredPermissions { get; }
+
+    public PermissionsAuthorizationRequirement(IEnumerable&amp;lt;Permission&amp;gt; requiredPermissions)
+    {
+        RequiredPermissions = requiredPermissions;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;Permission&lt;/code&gt; is an &lt;code&gt;enum&lt;/code&gt;, and this allows me to pass a list of them as the requirement&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:bc603b5d0602b8e850f1470fb6f73205:1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:bc603b5d0602b8e850f1470fb6f73205:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;.  Hopefully it&amp;rsquo;s apparent how this is more flexible than a instance-per-effective-permission would be, let alone class-per-effective-permission.&lt;/p&gt;
+
+&lt;p&gt;Now that I can express combined permissions easily, how can I use this so that I don&amp;rsquo;t have to manually check each resource and issues challenges?&lt;/p&gt;
+
+&lt;p&gt;One way to do this would be to abstract the authorization code into a base class for my authorized controllers, which would transform those lines to something like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-C#&#34;&gt;public async Task&amp;lt;IActionResult&amp;gt; Edit(Guid docId)
+{
+    var doc = /* ... */
+
+    await RequirePermissions(Permission.OneThing, Permission.AnotherThing));
+
+    return View(doc);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This is better, but now I have to pull this base class into the inheritance hierarchy in order to reuse the code, and the authorization mechanism still clutters up my action.&lt;/p&gt;
+
+&lt;p&gt;Fortunately, MVC provides a way to wrap actions with some code that doesn&amp;rsquo;t have to be so intrusive: filters.  So I think more ideally, I would be able to write this action method like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-C#&#34;&gt;[RequiresPermissions(Permission.One, Permission.Two)]
+public async Task&amp;lt;IActionResult&amp;gt; Edit(Guid docId)
+{
+    /* ... */
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In fact, in an earlier iteration of my application, we used a custom authorization filter with exactly these semantics, although it operated outside the Identity framework and idiomatic MVC conventions &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:bc603b5d0602b8e850f1470fb6f73205:2&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:bc603b5d0602b8e850f1470fb6f73205:2&#34;&gt;2&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+
+&lt;h1 id=&#34;leveraging-dependency-injection:bc603b5d0602b8e850f1470fb6f73205&#34;&gt;Leveraging Dependency Injection&lt;/h1&gt;
+
+&lt;p&gt;The trick here is that we need the DI container to get access to the &lt;code&gt;IAuthorizationService&lt;/code&gt; so that we can actually execute our authorization handler against the right &lt;code&gt;PermissionAuthorizationRequirement&lt;/code&gt;.  One approach is to use the container as a service locator, although that pattern has become commonly understood to be an anti-pattern because it makes testing much more difficult (or even impossible), and it also means that the type interface of a function or class that relies on it doesn&amp;rsquo;t accurately describe its behavior, so we&amp;rsquo;d like to stick with constructor injection.   MVC has never supported DI in filters - but it does in ASP.NET Core.&lt;/p&gt;
+
+&lt;p&gt;Take a look at the &lt;a href=&#34;https://docs.asp.net/en/latest/mvc/controllers/filters.html#configuring-filters&#34;&gt;documentation for configuring filters&lt;/a&gt;.  Buried in there a bit is a demonstration of how to implement a &amp;ldquo;filter factory&amp;rdquo; as a filter itself.  One that supports DI.  So in my case, like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-c#&#34;&gt;public RequiresPermissionAttribute : TypeFilterAttribute
+{
+    public RequiresPermissionAttribute(params Permission[] permissions)
+      : base(typeof(RequiresPermissionAttributeImpl))
+    {
+        Arguments = new[] { new PermissionAuthorizationRequirement(permissions) };
+    }
+
+    private class RequiresPermissionAttributeImpl : Attribute, IAsyncResourceFilter
+    {
+        private readonly ILogger _logger;
+        private readonly IAuthorizationService _authService;
+        private readonly PermissionsAuthorizationRequirement _requiredPermissions;
+
+        public RequiresPermissionAttributeImpl(ILogger&amp;lt;RequiresPermissionAttribute&amp;gt; logger,
+                                        IAuthorizationService authService,
+                                        PermissionsAuthorizationRequirement requiredPermissions)
+        {
+            _logger = logger;
+            _authService = authService;
+            _requiredPermissions = requiredPermissions;
+        }
+
+        public async Task OnResourceExecutionAsync(ResourceExecutionContext context,
+                                                   ResourceExecutionDelegate next)
+        {
+            if (!await _authService.AuthorizeAsync(context.HttpContext.User,
+                                        context.ActionDescriptor.ToString(),
+                                        _requiredPermissions))
+            {
+                context.Result = new ChallengeResult();
+            }
+
+            await next();
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;There are a couple of things worth pointing out. Most importantly, you will notice that &lt;code&gt;TypeFilterAttribute&lt;/code&gt; is constructed only with knowledge of the &lt;em&gt;type&lt;/em&gt; of the private class.  That alone will not be enough to construct an instance of &lt;code&gt;RequiresPermissionAttributeImpl&lt;/code&gt; because of the &lt;code&gt;requiredPermissions&lt;/code&gt; parameter.  That won&amp;rsquo;t come from the DI container because this is a &lt;em&gt;parameterized&lt;/em&gt; attribute.  Hopefully you&amp;rsquo;ve notice by now the line in the constructor for &lt;code&gt;RequiresPermissionsAttribute&lt;/code&gt;: it sets a property called &lt;code&gt;Arguments&lt;/code&gt;.  &lt;code&gt;TypeFilterAttribute&lt;/code&gt; doesn&amp;rsquo;t construct its configured type right away.  That happens later, and it exposes this &lt;code&gt;Arguments&lt;/code&gt; property specifically to allow us to parameterize the type to be constructed.  I can easily pass in whatever I like from the attribute annotation itself (within the regular constraints of an attribute of course: const values only, and enums qualify), and then I can set the &lt;code&gt;Arguments&lt;/code&gt; property.  Once that little bit of plumbing is taken care of, the private class can be written as though it were an attribute exposed like any other, but with the benefit of dependency injection - which means we can avoid anti-patterns &lt;em&gt;and&lt;/em&gt; leverage the existing Identity framework mechanisms to plug custom permissions-based authorization.  Win-win.&lt;/p&gt;
+&lt;div class=&#34;footnotes&#34;&gt;
+
+&lt;hr /&gt;
+
+&lt;ol&gt;
+&lt;li id=&#34;fn:bc603b5d0602b8e850f1470fb6f73205:1&#34;&gt;It might occur to you to make the &lt;code&gt;Permission&lt;/code&gt; enumeration be a flags &lt;code&gt;enum&lt;/code&gt;, but remember: I&amp;rsquo;m already at 83 permissions.  That would already demand more bits than are available in a .NET &lt;code&gt;long&lt;/code&gt;.
+ &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:bc603b5d0602b8e850f1470fb6f73205:1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li id=&#34;fn:bc603b5d0602b8e850f1470fb6f73205:2&#34;&gt;This isn&amp;rsquo;t a knock on anyone.  We &lt;em&gt;had&lt;/em&gt; to do something like this because we had requirements we needed to support and the church in ASP.NET Core (then &amp;ldquo;ASP.NET vNext&amp;rdquo;) was high and there were some gaps in the framework that kind of left us on our own.  Now that ASP.NET Core is released, we are replacing that mechanism with this one as a part of our RC1 -&amp;gt; 1.0.0 porting effort.
+ &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:bc603b5d0602b8e850f1470fb6f73205:2&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>an integration testing nightmare</title>
+      <link>http://benjamincollins.com/blog/an-integration-testing-nightmare/</link>
+      <pubDate>Thu, 12 May 2016 00:13:49 -0500</pubDate>
+      
+      <guid>http://benjamincollins.com/blog/an-integration-testing-nightmare/</guid>
+      <description>
+
+&lt;h1 id=&#34;motivation:5093521704865ed62f2c109e95993525&#34;&gt;Motivation&lt;/h1&gt;
+
+&lt;p&gt;Testing is a goal of many software teams.  It&amp;rsquo;s widely considered &amp;ldquo;virtuous&amp;rdquo; in software engineering to build tests along with an application or library that effectively describes the desired behavior, and then quantitatively scores whether or not the software achieves its stated goals (the tests &lt;em&gt;are&lt;/em&gt; the stated goals).  This is commonly referred to &lt;a href=&#34;https://en.wikipedia.org/wiki/Test-driven_development&#34;&gt;test-driven development&lt;/a&gt;, or TDD.  There are a couple of ways to go about writing tests, and one of the most widely discussed ways of testing is to write &amp;ldquo;unit tests&amp;rdquo; which by definition only test a single thing in isolation.  Having your code be covered by as many unit tests as possible is a really good thing.&lt;/p&gt;
+
+&lt;p&gt;But sometimes testing is &lt;em&gt;really&lt;/em&gt; hard.  Sometimes you can&amp;rsquo;t effectively isolate the thing you want to test.  Also, sometimes you want to test your software at a functional level, not at the unit level.  This kind of testing is called &amp;ldquo;integration&amp;rdquo; testing, or &amp;ldquo;functional testing.&amp;rdquo;  In web applications, integration testing often needs to be done through a browser.  This allows testers (or a test system) to avoid a lot of the trouble of isolating portions of an application or system to test and to focus on the behavior of the thing as the user would see it.&lt;/p&gt;
+
+&lt;p&gt;Automated testing is more desirable than manual testing, and so in order to do that, it&amp;rsquo;s helpful to have a browser that can run on a server without needing a UI or any kind of interactive session.  One would think that this problem would be more thoroughly solved than it is - but they&amp;rsquo;d be wrong, so here&amp;rsquo;s a brief description of how my team solved this problem in our situation.&lt;/p&gt;
+
+&lt;p&gt;Our goals are simple: automated tests, run on our CI server, with results for each build reported back through the build server application (TeamCity in our case).&lt;/p&gt;
+
+&lt;h1 id=&#34;what-s-available:5093521704865ed62f2c109e95993525&#34;&gt;What&amp;rsquo;s Available&lt;/h1&gt;
+
+&lt;p&gt;&lt;a href=&#34;http://www.seleniumhq.org/&#34;&gt;Selenium&lt;/a&gt; has been around forever.  The first I ever heard of doing testing &lt;em&gt;through a browser&lt;/em&gt;, this is what it was.  But Selenium didn&amp;rsquo;t replace the browser, they&amp;rsquo;ve just made them scriptable.  There are probably many situations where Selenium makes all the sense in the world, but in our case we didn&amp;rsquo;t want the hassle of supporting a browser and all that would go with that.  Also, none of us has experience with Selenium, so it felt like a steep learning curve.&lt;/p&gt;
+
+&lt;p&gt;Something we could install via NPM and for which we could write scripts was what we had in mind, and we found &lt;a href=&#34;phantomjs.org&#34;&gt;PhantomJS&lt;/a&gt;, which seemed to fully fit the bill.  It&amp;rsquo;s an adapted distribution of WebKit without the browser chrome, and there are integrations between it and TeamCity and the Mocha testing framework.  Unfortunately, we had constant issues getting PhantomJS to run in our development environments, and building it from sources was, again, a bigger hassle than we wanted to take on.  Also, NPM packages are unavailable in PhantomJS tests because it isn&amp;rsquo;t a Node module itself - it relies on the WebKit runtime.  It acts as it&amp;rsquo;s own runtime in practice, so between the problems getting it to run at all, and the limitation to ES5-only, pure-javascript-only test scripts, we decided to take another look and see if there was something better.&lt;/p&gt;
+
+&lt;p&gt;Finally, I came across &lt;a href=&#34;http://nightmarejs.org&#34;&gt;NightmareJS&lt;/a&gt;.  NightmareJS is similar to PhantomJS, but it&amp;rsquo;s based on Electron instead of WebKit, and it is written as a Node module.  It also has integration with Mocha, and it allows for both headless and non-headless testing.  We hadn&amp;rsquo;t really thought about this at the outset, but it&amp;rsquo;s pretty useful to see your script playing out on the UI when you&amp;rsquo;re developing the tests (see below).  On the CI server, the tests can be run in a headless mode.  Finally, because Nightmare is a Node module, the test scripts look just like any other Mocha test instead of a script specific to another runtime as was the case with PhantomJS.&lt;/p&gt;
+
+&lt;h1 id=&#34;the-setup:5093521704865ed62f2c109e95993525&#34;&gt;The Setup&lt;/h1&gt;
+
+&lt;p&gt;We&amp;rsquo;re using Node 6 for our front-end builds, and what&amp;rsquo;s nice is that this lets us write ES6 in our test scripts.  No webpack!&lt;/p&gt;
+
+&lt;p&gt;Our team utilizes &lt;a href=&#34;https://mochajs.org/&#34;&gt;MochaJS&lt;/a&gt; for our testing framework because it allows us to describe units simply, and there are runners that can report results to TeamCity in a way that it understands.  So, in our &lt;code&gt;package.json&lt;/code&gt;, we have some commands set up like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
+    // stuff
+    &amp;quot;scripts&amp;quot;: {
+        &amp;quot;build&amp;quot;: &amp;quot;webpack&amp;quot;,
+        &amp;quot;start&amp;quot;: &amp;quot;webpack-dev-server --content-base build/ --hot --progress --colors --host 0.0.0.0&amp;quot;,
+        &amp;quot;test&amp;quot;: &amp;quot;mocha \&amp;quot;test/!(integration)/**/*.js\&amp;quot; --require babel-core/register --require ignore-styles&amp;quot;,
+        &amp;quot;nightmare&amp;quot;: &amp;quot;mocha \&amp;quot;test/integration/**.js\&amp;quot; --require co-mocha&amp;quot;,
+        &amp;quot;tc-test&amp;quot;: &amp;quot;mocha -R mocha-teamcity-reporter \&amp;quot;test/!(integration)/**/*.js\&amp;quot; \
+            --require babel-core/register --require ignore-styles&amp;quot;,
+        &amp;quot;tc-nightmare&amp;quot;: &amp;quot;mocha -R mocha-teamcity-reporter \&amp;quot;test/integration/**.js\&amp;quot; --require co-mocha&amp;quot;,
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note that this isn&amp;rsquo;t valid JSON - I had to break a line to avoid a funky layout issue on the blog.&lt;/p&gt;
+
+&lt;p&gt;Hopefully this is fairly self-explanatory.  To run the tests, we just invoke &lt;code&gt;npm run nightmare&lt;/code&gt; on the console in a very similar way to the way we invoke our unit tests (&lt;code&gt;npm run test&lt;/code&gt;).  We created separates scripts for use on the CI server with the only difference being the type of reporter used to emit results.&lt;/p&gt;
+
+&lt;p&gt;Here&amp;rsquo;s quick little screencast I made of NightmareJS doing its thing, using an example from their &lt;a href=&#34;https://github.com/segmentio/nightmare&#34;&gt;GitHub repository&lt;/a&gt;.  Bigger version here: &lt;a href=&#34;http://recordit.co/wfjpxBVSyY&#34;&gt;recordit.co/wfjpxBVSyY&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://benjamincollins.com/img/wfjpxBVSyY.gif&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;a-couple-of-tricks:5093521704865ed62f2c109e95993525&#34;&gt;A Couple of Tricks&lt;/h2&gt;
+
+&lt;p&gt;In order to run this thing headless on Linux, there&amp;rsquo;s one other thing that has to be configured: xvfb.  Electron requires an X display to function, and xvfb creates a non-rendering X display for purposes just like these.&lt;/p&gt;
+
+&lt;p&gt;Another thing to note is that NightmareJS&amp;rsquo;s API is promise-based.  This means you have to deal with that asynchronicity in your test scripts somehow.  When just writing a script that will be run directly by Node, then you just call &lt;code&gt;.end()&lt;/code&gt; and use &lt;code&gt;.then()&lt;/code&gt; and &lt;code&gt;.catch()&lt;/code&gt; to resume where the promise is fulfilled, just like you would in any JS application.  However, in a testing scenario, you&amp;rsquo;re not running a script directly with Node, you&amp;rsquo;re using a test runner.  In our case, Mocha.  So we have to have something to handle the Promises for us: &lt;a href=&#34;https://github.com/blakeembrey/co-mocha&#34;&gt;Co-Mocha&lt;/a&gt;.  Look back up at our scripts definitions and you will see it required.&lt;/p&gt;
+
+&lt;p&gt;Here&amp;rsquo;s an example of one of our working tests (with some stuff changed to nonsense for privacy reasons):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var Nightmare = require(&#39;nightmare&#39;);
+var expect = require(&#39;chai&#39;).expect; // jshint ignore:line
+
+describe(&#39;Test Login&#39;, function() {
+  it(&#39;Should be able to login successfully&#39;, function*(done) {
+    this.timeout(10000);
+    var nightmare = Nightmare();
+    var link = yield nightmare
+      .goto(&#39;http://our.website.com&#39;)
+      .type(&#39;input[id=&amp;quot;email&amp;quot;]&#39;, &#39;user@email.com&#39;)
+      .type(&#39;input[id=&amp;quot;password&amp;quot;]&#39;, &#39;password&#39;)
+      .click(&#39;a[class=&amp;quot;btn btn-inline btn-primary&amp;quot;]&#39;) // FIXME: we need an ID on the login button!
+      .wait(&#39;.page-title&#39;)
+      .evaluate(function () {
+        return document.location.href
+      })
+      .end();
+    expect(link).to.equal(&#39;http://our.website.com/#/people/management/search&#39;);
+    done();
+  });
+});
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;They key is this line: &lt;code&gt;var link = yield nightmare...&lt;/code&gt;.  This uses a generator to return the promise back to the test runner to await completion.  Things written after the generator will execute in a &lt;code&gt;.then()&lt;/code&gt; after the promise completes.&lt;/p&gt;
+
+&lt;p&gt;Hit me up with questions if you have any!&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>introducing salty politics</title>
+      <link>http://benjamincollins.com/blog/introducing-salty-politics/</link>
+      <pubDate>Wed, 06 Apr 2016 01:23:29 -0500</pubDate>
+      
+      <guid>http://benjamincollins.com/blog/introducing-salty-politics/</guid>
+      <description>&lt;p&gt;I&amp;rsquo;d like to call some attention to another blogging project I am trying to take on.  I call it &lt;a href=&#34;https://saltypolitics.com&#34;&gt;Salty Politics&lt;/a&gt;.  I&amp;rsquo;ve pushed the publish button on the first post there, called &lt;a href=&#34;https://saltypolitics.com/salty-politics-an-introduction-6be6350e31ff&#34;&gt;Salty Politics: An Introcution&lt;/a&gt;. Writing about politics is tricky enough on its own - but writing about them and trying to do it from a Christian perspective is doubly hard. The older generations used to have sayings along the lines of &amp;ldquo;never discuss politics or religion in polite company&amp;rdquo;, and there is wisdom in that. It&amp;rsquo;s hard to do without upsetting people from one or both angles.&lt;/p&gt;
+
+&lt;p&gt;Those of you who know me much at all know my political leanings to one degree or another, but the idea here is not to throw up yet another partisan blog.  The idea is to publicly reason about how faith in Christ should drive the political activity of Christians and offer commentary about political events and personalities from that perspective. It is my earnest hope to someday have collaborators who have different political views that my own - but I gotta start somewhere.&lt;/p&gt;
+
+&lt;p&gt;Credit cover photo &lt;a href=&#34;https://www.flickr.com/photos/liquene/4367272051/in/photolist-dcaeVN-kWPKB-bDvmq8-9rTHhf-eKJuSo-eKJsp7-axjLJD-HPnt4-9E5d6y-e35fMD-9VKDWU-ocAia6-7DVpPZ-ocw9Cw-5qVrsu-ocAnrc-ocwjsG-nV72Yk-6irFvN-nV6Qvw-nV6S8u-nV72su-4ntnpo-ocBCKg-oeoChz-5R5CvB-6P6WZz-AtZhUT-DsDLNv-ocrUFo-nV6Z5p-4C2C7p-nV7aen-nV85ZB-ocw82A-ocAw16-ocrAyG-nV6TBv-nV8eck-nVgjus-oazoUs-wDL1R-t2vLVr-5vWTFq-5ggcdg-dhrRqy-4nBvHk-akYwZq-6UdoK6-4wsCdP/&#34;&gt;Alessandro Valli&lt;/a&gt;&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>projects</title>
+      <link>http://benjamincollins.com/projects/</link>
+      <pubDate>Tue, 29 Mar 2016 22:46:57 -0500</pubDate>
+      
+      <guid>http://benjamincollins.com/projects/</guid>
+      <description>
+
+&lt;p&gt;
+
+
+    
+    
+        
+        
+        
+            
+        
+        
+            
+        
+    
+
+    
+    
+    
+
+    
+    
+
+
+
+
+    
+
+
+    
+
+    
+        &lt;p&gt;&lt;span class=&#34;image center-image&#34;&gt;
+            &lt;img src=&#34;http://benjamincollins.com/img/Strip-Side-project-650-finalenglish.jpg&#34; alt=&#34;Oooh, shiny!&#34; /&gt;
+        &lt;/span&gt;&lt;/p&gt;
+    
+
+
+&lt;a href=&#34;http://www.commitstrip.com/en/2014/11/25/west-side-project-story/&#34;&gt;Credit CommitStrip&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;useful-things:3c42bb4157bf51d85ae7ffc4e1685909&#34;&gt;Useful things&lt;/h2&gt;
+
+&lt;h3 id=&#34;stacktrello-https-gist-github-com-aggieben-5811685:3c42bb4157bf51d85ae7ffc4e1685909&#34;&gt;&lt;a href=&#34;https://gist.github.com/aggieben/5811685&#34;&gt;StackTrello&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;A simple UserScript that adds a &amp;lsquo;trello&amp;rsquo; link to meta.* StackExchange posts to allow the user to rapidly create a trello card from the post. The purpose of this is to make SE sites even more useful as a bug-tracking / community management tool.For a brief screencast, see: &lt;a href=&#34;http://youtu.be/AUJ27ISlTVI&#34;&gt;http://youtu.be/AUJ27ISlTVI&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;substantial-contributions-to-other-projects:3c42bb4157bf51d85ae7ffc4e1685909&#34;&gt;Substantial contributions to other projects&lt;/h2&gt;
+
+&lt;h3 id=&#34;weblocks-https-github-com-aggieben-weblocks:3c42bb4157bf51d85ae7ffc4e1685909&#34;&gt;&lt;a href=&#34;https://github.com/aggieben/weblocks&#34;&gt;Weblocks&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;I contributed quite a lot to a demo application (called &lt;a href=&#34;https://github.com/aggieben/simple-blog&#34;&gt;simple-blog&lt;/a&gt;) demonstrating how to use the Weblocks framework.  I also made some screencasts about Weblocks and Lisp programming in an Emacs environment.  Unfortunately, I have been unable to find where I hosted these, and the blog where I originally wrote about them is long gone.&lt;/p&gt;
+
+&lt;h2 id=&#34;graveyard:3c42bb4157bf51d85ae7ffc4e1685909&#34;&gt;Graveyard&lt;/h2&gt;
+
+&lt;h3 id=&#34;cl-slimtimer-https-github-com-aggieben-cl-slimtimer:3c42bb4157bf51d85ae7ffc4e1685909&#34;&gt;&lt;a href=&#34;https://github.com/aggieben/cl-slimtimer&#34;&gt;cl-slimtimer&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;Common Lisp implementation of slimtimer.com REST API&lt;/p&gt;
+
+&lt;h3 id=&#34;golang-sdk-for-trello-api-https-github-com-aggieben-trello:3c42bb4157bf51d85ae7ffc4e1685909&#34;&gt;&lt;a href=&#34;https://github.com/aggieben/trello&#34;&gt;Golang SDK for Trello API&lt;/a&gt;&lt;/h3&gt;
+
+&lt;h3 id=&#34;blogone-https-github-com-aggieben-blogone:3c42bb4157bf51d85ae7ffc4e1685909&#34;&gt;&lt;a href=&#34;https://github.com/aggieben/blogone&#34;&gt;BlogOne&lt;/a&gt;&lt;/h3&gt;
+
+&lt;h3 id=&#34;igx-https-github-com-aggieben-igx:3c42bb4157bf51d85ae7ffc4e1685909&#34;&gt;&lt;a href=&#34;https://github.com/aggieben/igx&#34;&gt;igx&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;This is what I could find from an older project that I did trying to build my own operating system (mostly a kernel) with the intent of building cluster machines.  The ideas I was working on were related to stuff I had been thinking about and working on during my thesis research as well as the products I worked on at L-3.  I completed quite a bit more than what is available on GitHub, but sadly this is all I could find.&lt;/p&gt;
+
+&lt;h3 id=&#34;qxlisp-https-github-com-aggieben-qxlisp:3c42bb4157bf51d85ae7ffc4e1685909&#34;&gt;&lt;a href=&#34;https://github.com/aggieben/qxlisp&#34;&gt;qxlisp&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;A backend RPC server for use with the Qooxdoo js framework (which I think is now defunct).&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>about</title>
+      <link>http://benjamincollins.com/about/</link>
+      <pubDate>Tue, 29 Mar 2016 22:00:30 -0500</pubDate>
+      
+      <guid>http://benjamincollins.com/about/</guid>
+      <description>
+
+&lt;p&gt;My name is Ben Collins.  I&amp;rsquo;m a software engineer, father, husband, and Christ-follower.  I blog about technology and code of course, but also occasionally about my faith, politics, or random things that interest me (like Star Wars!).&lt;/p&gt;
+
+&lt;h2 id=&#34;background:6083a88ee3411b0d17ce02d738f69d47&#34;&gt;Background&lt;/h2&gt;
+
+&lt;p&gt;I graduated with a B.S. in Computer Science from Texas A&amp;amp;M University - College Station (&lt;em&gt;The&lt;/em&gt; University), and then soon after with a M.Eng.&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:6083a88ee3411b0d17ce02d738f69d47:1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:6083a88ee3411b0d17ce02d738f69d47:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; in Computer Engineering&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:6083a88ee3411b0d17ce02d738f69d47:2&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:6083a88ee3411b0d17ce02d738f69d47:2&#34;&gt;2&lt;/a&gt;&lt;/sup&gt;.  I also got married during these years to the girl I had a crush on throughout 8-12&lt;sup&gt;th&lt;/sup&gt; grades.&lt;/p&gt;
+
+&lt;p&gt;Out of school I moved to Greenville, Texas. Why?  Well&amp;hellip;mostly because it&amp;rsquo;s home.  I grew up in neighboring Farmersville, where my parents still live.  My wife is from Grenville, where her parents and extended family still live.  I was able to get a job at the L-3 Communications facility there writing embedded software for airborne signal processing platforms, which I did for about 3 &lt;sup&gt;1&lt;/sup&gt;&amp;frasl;&lt;sub&gt;2&lt;/sub&gt; years.&lt;/p&gt;
+
+&lt;p&gt;After that, I decided to try something different and joined a small consulting agency out of Dallas through a connection with my friend, &lt;a href=&#34;https://www.simple-talk.com/blogs/author/2140-damon-armstrong/&#34;&gt;Damon Armstrong&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Later, I had an opportunity to work for a startup (also in Dallas), and that was unique adventure, but also one that didn&amp;rsquo;t end like we hoped - but I soon found myself working for &lt;a href=&#34;http://stackoverflow.com&#34;&gt;Stack Overflow&lt;/a&gt; (then going by Stack Exchange) as a developer on the Q&amp;amp;A team.&lt;/p&gt;
+
+&lt;p&gt;I left Stack Overflow in 2015 and founded my own services company, &lt;a href=&#34;http://trinityrepublic.com&#34;&gt;Trinity Republic&lt;/a&gt;, where we build applications for clients who need them.&lt;/p&gt;
+
+&lt;h2 id=&#34;random-personal-tidbits:6083a88ee3411b0d17ce02d738f69d47&#34;&gt;Random Personal Tidbits&lt;/h2&gt;
+
+&lt;p&gt;I am interested in the minutae of an absurd range of topics.  I love sci-fi, and have lots of strong opinions about a variety of things.  I have 6 beautiful children in whom my wife and I are heavily invested as homeschooling parents.  I have aspirations of learning Spencerian script, some languages (Spanish, Mandarin, Gaelic), and being a competitive athlete (crossfit or triathlon). I fancy myself as a capable do-it-yourselfer (leading me, perhaps delusionally, to buy a home built in 1912).  I am active in local politics, where I serve as an appointed official for my city.&lt;/p&gt;
+
+&lt;h2 id=&#34;my-faith:6083a88ee3411b0d17ce02d738f69d47&#34;&gt;My faith&lt;/h2&gt;
+
+&lt;p&gt;I believe in a real, personal God (i.e., he is actually a person), a historical Jesus who was crucified in a supreme act of love to provide a path for reconciliation with God to an irreconcilably corrupt human race, and then rose back to physical life as proof of this work and a foundation for hope in him.&lt;/p&gt;
+&lt;div class=&#34;footnotes&#34;&gt;
+
+&lt;hr /&gt;
+
+&lt;ol&gt;
+&lt;li id=&#34;fn:6083a88ee3411b0d17ce02d738f69d47:1&#34;&gt;I actually was close to completing a Master of Science and had done a lot of the work toward completing my thesis, but switched near the end to the Master of Engineering so that I could graduate sooner and get a job to provide for my wife and soon-to-be-born twin son and daughter.
+ &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:6083a88ee3411b0d17ce02d738f69d47:1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li id=&#34;fn:6083a88ee3411b0d17ce02d738f69d47:2&#34;&gt;I chose computer engineering for my master&amp;rsquo;s program instead of computer science because the degree plan was more flexible.
+ &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:6083a88ee3411b0d17ce02d738f69d47:2&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Hugo on Azure from GitLab</title>
+      <link>http://benjamincollins.com/blog/hugo-on-azure-from-gitlab/</link>
+      <pubDate>Wed, 17 Feb 2016 00:38:53 -0600</pubDate>
+      
+      <guid>http://benjamincollins.com/blog/hugo-on-azure-from-gitlab/</guid>
+      <description>
+
+&lt;h1 id=&#34;why:2269a556312195e0d126f9d2df51cae5&#34;&gt;Why?&lt;/h1&gt;
+
+&lt;p&gt;I recently came across &lt;a href=&#34;http://gohugo.io&#34;&gt;Hugo&lt;/a&gt;, a static website generator.  It&amp;rsquo;s based on Go,
+and uses the Go templating engine.  It sounded interesting, and I had been looking for something
+to re-build my personal website, so I decided to give it a try.  The only thing one needs in order
+to host a Hugo-based website is hosting of some kind.  I have Azure credits, so that seemed easy.  I also wanted to push the sources for my website to a private repository, and I don&amp;rsquo;t have a paid
+GitHub account, so I needed something else.  &lt;a href=&#34;http://gitlab.com&#34;&gt;GitLab.com&lt;/a&gt; allows users to have private repositories, so I decided to go with that.&lt;/p&gt;
+
+&lt;h1 id=&#34;setting-up-hugo:2269a556312195e0d126f9d2df51cae5&#34;&gt;Setting up Hugo&lt;/h1&gt;
+
+&lt;p&gt;Setting up a Hugo site is very easy.  Really, it&amp;rsquo;s probably best to follow &lt;a href=&#34;http://gohugo.io/overview/quickstart/&#34;&gt;the documentation&lt;/a&gt;.  However, I would add that once you pick a theme you&amp;rsquo;re going to work with (or create your own), you should probably not commit &lt;em&gt;all&lt;/em&gt; the themes as submodules.  After I selected a theme, I cleared everything out of the &lt;code&gt;themes&lt;/code&gt; directory and then cloned just my theme directly as a submodule.&lt;/p&gt;
+
+&lt;p&gt;Also, go ahead and commit the Hugo executable in your repository.  It&amp;rsquo;s not &lt;em&gt;that&lt;/em&gt; big, and we&amp;rsquo;ll need it during deployment.  It&amp;rsquo;s actually a beautiful thing: we don&amp;rsquo;t have to deploy the entire Golang stack anywhere.  All we need is the Hugo executable.&lt;/p&gt;
+
+&lt;h1 id=&#34;setting-up-azure:2269a556312195e0d126f9d2df51cae5&#34;&gt;Setting up Azure&lt;/h1&gt;
+
+&lt;p&gt;Next, I needed to set up the Azure website.  Using the portal, it&amp;rsquo;s pretty simple to create a &amp;ldquo;web app&amp;rdquo; service.  Once that was done, I needed to set up continuous deployment so I could deploy from Git.&lt;/p&gt;
+
+&lt;h2 id=&#34;continuous-deployment:2269a556312195e0d126f9d2df51cae5&#34;&gt;Continuous Deployment&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://benjamincollins.com/img/cd-screenshot.png&#34; alt=&#34;continuous deployment&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Since I&amp;rsquo;m using GitLab and Azure doesn&amp;rsquo;t have a specific integration for it, I set this up as an &amp;ldquo;External Repository&amp;rdquo;.  All that&amp;rsquo;s required for an external repository is a clone url and a branch name.  Since I&amp;rsquo;m going to later rely on SSH keys to authenticate the Azure deployment service (Kudu) to my private repository, I use an SSH clone url: &lt;code&gt;git@gitlab.com:myusername/mysitename.git&lt;/code&gt;.  I&amp;rsquo;m using the &lt;code&gt;master&lt;/code&gt; branch.&lt;/p&gt;
+
+&lt;h2 id=&#34;customizing-deployment:2269a556312195e0d126f9d2df51cae5&#34;&gt;Customizing Deployment&lt;/h2&gt;
+
+&lt;p&gt;Kudu allows you to &lt;a href=&#34;https://github.com/projectkudu/kudu/wiki/Custom-Deployment-Script&#34;&gt;customize your deployment process&lt;/a&gt;, and that&amp;rsquo;s what I needed to do.  I also wanted to support more advanced deployment features, like Azure&amp;rsquo;s deployment slots.  In order to support those kinds of things, I wanted to do some basic variable substitution in the Hugo config file (&lt;code&gt;config.toml&lt;/code&gt;).  For example, I set &lt;code&gt;baseurl&lt;/code&gt; to &lt;code&gt;http://%%HTTP_HOST%%/&lt;/code&gt;, and then in my deployment script I replace that with the &lt;code&gt;$env:WEBSITE_HOSTNAME&lt;/code&gt; environment variable on Azure.  That allows me to have one set of files that can be continuously deployed to production &lt;em&gt;and&lt;/em&gt; non-production deployment slots. &lt;!-- need footnote here about how deployment slots actually aren&#39;t that helpful because swapping can cause the ssh key to change --&gt;.&lt;/p&gt;
+
+&lt;p&gt;Kudu will read a &lt;code&gt;.deployment&lt;/code&gt; file in the root of your repository, and in it we can specify a deployment command.  Also, the Azure CLI can generate a deployment script to use as a basis for your own custom steps (see the Kudu link above regarding custom deployment scripts), so I did that, and then wrote these steps:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-powershell&#34;&gt;# 1. Variable substitutions
+if ($env:HTTP_HOST -ne &amp;quot;&amp;quot;) {
+    echo &amp;quot;doing substitutions on $DEPLOYMENT_SOURCE\config.toml&amp;quot;
+    gc &amp;quot;$DEPLOYMENT_SOURCE\config.toml&amp;quot; `
+        | %{ $_ -replace &#39;%%HTTP_HOST%%&#39;, $env:WEBSITE_HOSTNAME } `
+        | out-file -encoding ascii &amp;quot;$DEPLOYMENT_SOURCE\config.new.toml&amp;quot;
+    mv &amp;quot;$DEPLOYMENT_SOURCE\config.toml&amp;quot; &amp;quot;$DEPLOYMENT_SOURCE\config.old.toml&amp;quot;
+    mv &amp;quot;$DEPLOYMENT_SOURCE\config.new.toml&amp;quot; &amp;quot;$DEPLOYMENT_SOURCE\config.toml&amp;quot;
+    rm &amp;quot;$DEPLOYMENT_SOURCE\config.old.toml&amp;quot;
+    exitWithMessageOnError &amp;quot;HTTP_HOST substitution failed&amp;quot;
+}
+
+# 2. Hugo in temporary path
+&amp;amp; &amp;quot;$DEPLOYMENT_SOURCE/bin/hugo.exe&amp;quot; -s &amp;quot;$DEPLOYMENT_SOURCE&amp;quot; `
+    -d &amp;quot;$DEPLOYMENT_SOURCE/public&amp;quot; --log -v
+exitWithMessageOnError &amp;quot;Hugo site generation failed&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&#34;setting-up-gitlab:2269a556312195e0d126f9d2df51cae5&#34;&gt;Setting up GitLab&lt;/h1&gt;
+
+&lt;p&gt;It doesn&amp;rsquo;t take much to &amp;ldquo;set up&amp;rdquo; GitLab.  Once you have a repository and you&amp;rsquo;re able to push to it, all that remains is to ensure that the Azure deployment service (Kudu) has access to it and to set up a webhook to notify Azure when changes are pushed.  If you&amp;rsquo;re using a public repo, you&amp;rsquo;re already done.  Just use HTTPS and skip this step.  If you&amp;rsquo;re using a private repo like me, then you&amp;rsquo;ll need to use Kudu&amp;rsquo;s ssh keys as deploy keys on GitLab.&lt;/p&gt;
+
+&lt;h2 id=&#34;deploy-keys:2269a556312195e0d126f9d2df51cae5&#34;&gt;Deploy Keys&lt;/h2&gt;
+
+&lt;p&gt;First, log in to the Kudu service for your Azure website: &lt;code&gt;https://{sitename}.scm.azurewebsites.net&lt;/code&gt; - there&amp;rsquo;s actually a link with the password in it on the azure portal blade for the site.  Once you&amp;rsquo;re authenticated, you&amp;rsquo;ll have a cookie and will be able to do the next part (or you could skip this and just use the &lt;code&gt;username:password&lt;/code&gt;-formatted url you can get from your publishing settings).  Go to &lt;code&gt;https://{sitename}.scm.azurewebsites.net/api/sshkey?ensurePublicKey=1&lt;/code&gt;.  The result will be an ssh public key as a json string, so copy the parts between the quotes and then head over to GitLab and paste it in as a deploy key.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://benjamincollins.com/img/deploy-key-screenshot.png&#34; alt=&#34;deploy keys&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;These keys will provide anonymous, read-only access to the repository for the Kudu service.&lt;/p&gt;
+
+&lt;h2 id=&#34;webhook:2269a556312195e0d126f9d2df51cae5&#34;&gt;Webhook&lt;/h2&gt;
+
+&lt;p&gt;Finally, to get your website to deploy when you push to Git, you need to configure a webhook on your project in GitLab.  Again referencing the &lt;a href=&#34;https://github.com/projectkudu/kudu/wiki/Continuous-deployment&#34;&gt;Kudu documentation&lt;/a&gt;, we need the hook to target &lt;code&gt;https://$mysite:BigRandomPassword@mysite.scm.azurewebsites.net/deploy&lt;/code&gt;.  You can copy the site credentials (the &lt;code&gt;$mysite:pssword&lt;/code&gt; part in the url) from the Azure Portal:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://benjamincollins.com/img/azure-site-credentials.png&#34; alt=&#34;Azure site credentials&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;With this information, you can navigate to your GitLab project and go to the &amp;ldquo;Webhook&amp;rdquo; tab (Project &amp;gt; Settings &amp;gt; Web Hooks).  The default settings should be adequate (&amp;ldquo;Push events&amp;rdquo; checked, &amp;ldquo;Enable SSL verification&amp;rdquo; checked). Click on Add Web Hook, and then copy in the url above including the credentials obtained from the Azure portal.&lt;/p&gt;
+
+&lt;h1 id=&#34;fin:2269a556312195e0d126f9d2df51cae5&#34;&gt;Fin&lt;/h1&gt;
+
+&lt;p&gt;That&amp;rsquo;s it!  I (and hopefully you too, if that&amp;rsquo;s what you were going for) have continuous deployment set up for my Hugo site on Azure.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>A Review of Episode VII: The Force Awakens</title>
+      <link>http://benjamincollins.com/blog/a-review-of-episode-vii-the-force-awakens/</link>
+      <pubDate>Wed, 30 Dec 2015 00:00:00 +0000</pubDate>
+      
+      <guid>http://benjamincollins.com/blog/a-review-of-episode-vii-the-force-awakens/</guid>
+      <description>
+
+&lt;p&gt;I have an idea about who Rey is, and I think it&amp;rsquo;s somewhat original. I thought of it on my own, anyway.&lt;/p&gt;
+
+&lt;p&gt;Warning: there are definitely spoilers all over this post.  If you haven&amp;rsquo;t seen the film and you still want he suspense of not knowing, then DO NOT READ THIS.&lt;/p&gt;
+
+&lt;p&gt;I went to go see The Force Awakens three times.  First, I went with my wife to the opening show.&lt;/p&gt;
+
+&lt;h1 id=&#34;first-impressions:c3c19f67055bd5cab1b657b0223d1ccc&#34;&gt;First Impressions&lt;/h1&gt;
+
+&lt;p&gt;I was very excited to see this movie.  I&amp;rsquo;m an avid Star Wars fan, and sci-fi enthusiast.  Seeing this in a 3D IMAX theater was pretty neat, although it wasn&amp;rsquo;t much of a downer to see it on a regular 2D screen later on.
+The visuals and score were really very good.  The fact that LucasFilm actually engineered a real BB-8 droid is just fantastic.  The realism of that character in the movie makes a difference in making you feel like you&amp;rsquo;re in the story, not just an observer.  I also appreciate the attention to detail.  For example, ever wonder why you can see the weapons firing if they&amp;rsquo;re lasers?  That&amp;rsquo;s because weapons used in the movies are not lasers - they are plasma weapons.  Plasma is not light, and so it would propagate differently than lasers would, which are merely focused light.  That was apparent in this movie, where the blaster bolts seemed a little bit like lit-up trails of goo.  It&amp;rsquo;s particularly apparent in the scene where Kylo Ren actually freezes a blast mid-air.  Now, whether plasma would actually propagate that way is beyond my ability to analyze, but the movie makes it clearly distinct from what we understand lasers to be.&lt;/p&gt;
+
+&lt;p&gt;I also thought Abrams (or the writers) did a pretty neat job of inserting humor into the dialogue without giving the viewer a campy feel.  They get a few laughs from BB-8 like the writers of the original trilogy did with R2D2, but they also get a couple laughs from the main characters as well.  I laughed.  Most people in the theater with me did as well.&lt;/p&gt;
+
+&lt;p&gt;I thought some of the parallels with Episode IV: A New Hope were a bit overwraught:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;The main protagonist is held by obligation or loyalty to family in a desolate planet (a desert planet, no less)&lt;/li&gt;
+&lt;li&gt;A fugitive droid carrying much-sought-after information involves the protagonist in the great movements of the galaxy&lt;/li&gt;
+&lt;li&gt;The quest to see the droid/information in the right hands leads the protagonist away from the desert planet with the help of Han Solo via a canteena with multi-species live music&lt;/li&gt;
+&lt;li&gt;The bad guys have built another death star (this time bigger and badder), but still with an exposed single point of failure&lt;/li&gt;
+&lt;li&gt;A protagonist has to be rescued from the death star (in this case, the main one)&lt;/li&gt;
+&lt;li&gt;Once the droid/information is returned to the good guys, they work to blow up the death star&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I understand why they did that - they wanted to capture as much of the fan base from the other movies as possible, and for most people I think these parallels are pretty fun.  I enjoyed them - but I also think there was something of an opportunity cost in that they could have done something more original (albeit at the risk of not capitalizing on the value of the brand as well, which was the whole point).&lt;/p&gt;
+
+&lt;p&gt;There were two things that really bothered me though, and those were: the fundamental absence of Luke from the story (more on that later); and Rey.  Walking out of the theater the first time, I thought they had overplayed their desire to have a strong female lead.  The scene in which Rey expresses irritation that Fin grabbed her hand felt very in-your-face, and worse, they had her exercising abilities out of nowhere that in every other part of the canonical Star Wars universe took years of training to manifest.  Even Luke Skywalker was unable to exercise any degree of mastery over the force without training by a master - but Rey seems to just be able to do it.&lt;/p&gt;
+
+&lt;p&gt;This bothered me a lot.  Why would Rey be able to withstand and even counter a force-assisted interrogation by a trained opponent?  Why would she, completely untrained, be able to perform the &amp;ldquo;Jedi mind trick&amp;rdquo; on the stormtrooper guarding her cell on Starkiller Base?  How could she possibly exercise a telekinesis stronger than Kylo Ren&amp;rsquo;s when they both reach out with the force for Luke&amp;rsquo;s lightsaber?  How could she possibly successfully combat a trained, superior opponent with a lightsaber, which she has never held before?  Were the writers really that desperate for a &amp;ldquo;I can do anything you can do but better&amp;rdquo; kind of feminism to come through on screen?  If not that, did they simply not care about continuity?  Don&amp;rsquo;t they know that if the viewers are unable to maintain their suspense of disbelief, then the story is dead (that&amp;rsquo;s he critical ingredient of any good sci-fi)?&lt;/p&gt;
+
+&lt;p&gt;Then I started trying to think about who Rey could possibly be that she would be this character that I just saw.  I read one explanation for her swordsmanship: she had learned to defend herself on Jakku with a staff, and a staff and sword can lend themselves to similar techniques.  That sounds somewhat plausible, but I was unconvinced.  There are also theories about her being Luke&amp;rsquo;s daughter, but her force-sensitivity is the only evidence for that, and there are plenty of contradictions: Han and Leia would have responded to her differently if she were their niece; and why would Luke have dumped her on Jakku?  Similarly with speculation that she is Han and Leia&amp;rsquo;s daughter.  Besides - the Skywalkers aren&amp;rsquo;t the only family in the galaxy with force sensitivity.&lt;/p&gt;
+
+&lt;p&gt;Then it struck me.  The key is the scene in Maz Kenata&amp;rsquo;s place.  Remember how Maz said that she had learned to read people through their eyes (the line was something like &amp;ldquo;when you&amp;rsquo;ve lived as long as I have, you learn to see the same eyes in different people&amp;rdquo;)?  When Fin goes to try to find passage with those traders and Rey walks off after him, Maz shifts her attention back to Han and asks, &amp;ldquo;so, who&amp;rsquo;s the girl?&amp;rdquo;  Then the camera immediately moves back to Rey so that you don&amp;rsquo;t hear any of what Han tells her.  &lt;strong&gt;I think Maz knows that Han already knows who she is.&lt;/strong&gt; That was the first key insight.&lt;/p&gt;
+
+&lt;h1 id=&#34;another-look-who-is-rey:c3c19f67055bd5cab1b657b0223d1ccc&#34;&gt;Another Look: Who is Rey?&lt;/h1&gt;
+
+&lt;p&gt;I saw the film another time, and this time I wanted to test out the idea that Han already knew who she was.  It seemed to hold water.  Remember how she fixed the issue with the compressor on the hyperdrive line (or something&amp;hellip;can&amp;rsquo;t quite remember the terms there), looking back at Han saying, &amp;ldquo;I bypassed the compressor&amp;rdquo;?  He looked at her and just said &amp;ldquo;huh&amp;rdquo;.  Then, they landed on the planet where Maz Kenata&amp;rsquo;s was, and he offered her a job on the Millenium Falcon.  Didn&amp;rsquo;t he just meet this girl?  Isn&amp;rsquo;t that kinda odd?  But what if he already knew her proficiencies and wanted to keep her close because he already knows that she has an association with Luke?&lt;/p&gt;
+
+&lt;p&gt;Now fast-forward back to the cantina scene: a little later, she wanders down to the basement corridor because of the voices she&amp;rsquo;s hearing, trying to find their source.  She finds herself opening a small wooden crate, and looking at Luke&amp;rsquo;s lightsaber.  She touches it and has a vision: scenes in a corridor, and then falling out of that corridor escaping what appears to be a collapsing building or something, into the rain.  She then sees Kylo Ren standing over what appears to be a battlefield with a small cohort behind him.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://benjamincollins.com/img/ren_rain.png&#34; alt=&#34;Kylo Ren in a past memory&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Then she sees a robed figure with a robotic hand reaching up to R2D2 (and given the ending of the movie in which Luke has the uncovered robotic hand), it seems pretty clear that this is Luke.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://benjamincollins.com/img/luke-vision.png&#34; alt=&#34;Luke Skywalker in a past memory, reaching up to R2-D2&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Then she envisions the fight with Ren in a snowy forest:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://benjamincollins.com/img/ren-snow.png&#34; alt=&#34;Foreseeing the fight with Ren to come&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I think the &amp;ldquo;vision&amp;rdquo; is actually memories triggered by Luke&amp;rsquo;s lightsaber, followed by a force-induced vision of the future.  Whether or not the lightsaber is imbued with some sort of &amp;ldquo;force aura&amp;rdquo; of the owner, or if it simply was an an artifact of some import isn&amp;rsquo;t important.  The snowy fight scene obviously occurs later in the film, but we get no further explanation of the other parts of the vision.&lt;/p&gt;
+
+&lt;p&gt;Then when Maz intercepts her in the cellar, she wants her to embrace the force, and take Luke&amp;rsquo;s lightsaber, and also indicates that the family she is waiting to come back for her on Jakku isn&amp;rsquo;t coming back.  From the earlier conversation between herself and Han, Maz knows that Rey is a force user.  Rey doesn&amp;rsquo;t accept what she&amp;rsquo;s saying and runs out, but displays an increasing aptitude in the aforementioned skills with the force.&lt;/p&gt;
+
+&lt;p&gt;This is when I decided who I think Rey is: she is one of Luke&amp;rsquo;s students.  &lt;strong&gt;She&amp;rsquo;s one of the New Jedi.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;What we&amp;rsquo;re witnessing here is a sort of Star Wars-y Bourne Identity.  I think she actually has already been trained in the use of the force.  I think when Ben Solo turned on Luke and became Kylo Ren, Luke used the force to block the memories of whatever of the New Jedi were remaining and then hid them around the galaxy in backwaters like Jakku in order to keep them safe - so I also think there are more Rey-type characters out there.  I think he also instructed R2D2 to go into hibernation for some specified period of time, and then went into hiding himself until such time that the First Order would be vulnerable (maybe the destruction of the Starkiller Base triggered R2D2 - or maybe Luke felt the base destroyed and sent a signal to R2).&lt;/p&gt;
+
+&lt;p&gt;This helps me with what bothered me about Luke&amp;rsquo;s absence: what if he had actually masterminded a lot of this to begin with?  He is a Jedi Master at this point, right (probably)?&lt;/p&gt;
+
+&lt;p&gt;After these conclusions, it all makes so much more sense to me, and I love this film.  I think Rey is a really fantastic character, and I absolutely love the idea of a defecting storm trooper (like, why didn&amp;rsquo;t this happen before!?).&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Hack the Backyard II</title>
+      <link>http://benjamincollins.com/blog/hack-the-backyard-ii/</link>
+      <pubDate>Sat, 28 Nov 2015 00:00:00 +0000</pubDate>
+      
+      <guid>http://benjamincollins.com/blog/hack-the-backyard-ii/</guid>
+      <description>
+
+&lt;h1 id=&#34;yarwppt:da89dd30c63dded3f4644fe487658c11&#34;&gt;YARWPPT&lt;/h1&gt;
+
+&lt;p&gt;So, working remotely can be a desirable state of affairs for a lot of people.  But there are some things that one has
+to give particular attention to in order to succeed.&lt;/p&gt;
+
+&lt;h2 id=&#34;communication-presence:da89dd30c63dded3f4644fe487658c11&#34;&gt;Communication &amp;amp; Presence&lt;/h2&gt;
+
+&lt;p&gt;In part one, I called out feelings of isolation and difficulties in communication as challenges to be overcome.  The
+basic problem in both areas is that there isn&amp;rsquo;t a direct replacement for being co-located with your teammates.  Understanding what it is you&amp;rsquo;re replacing is the first step.&lt;/p&gt;
+
+&lt;p&gt;When you&amp;rsquo;re co-located, you take for granted that you can just pop over to someone&amp;rsquo;s office and have a quick conversation (never mind that you just destroyed that person&amp;rsquo;s concentration), or collaborate on a whiteboard.  When you&amp;rsquo;re not co-located, you have to be much more deliberate to accomplish the same tasks.&lt;/p&gt;
+
+&lt;p&gt;There&amp;rsquo;s also the notion of &lt;em&gt;presence&lt;/em&gt;, which is hard to quantify, but it&amp;rsquo;s the benefit of just being around people.  When they&amp;rsquo;re working hard on something, you know.  You know when they arrive to and leave from work.  You can sometimes tell if they&amp;rsquo;re having a bad day.  You also feel like part of a group working toward a common goal.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://benjamincollins.com/img/isolated.jpg&#34; alt=&#34;feeling isolated&#34; title=&#34;feeling isolated&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;When you&amp;rsquo;re remote you have to be much more intentional about achieving the same results.&lt;/p&gt;
+
+&lt;h2 id=&#34;tools:da89dd30c63dded3f4644fe487658c11&#34;&gt;Tools&lt;/h2&gt;
+
+&lt;p&gt;The way to replace what you&amp;rsquo;ve lost by not being co-located is to use helpful tools.  No one tool will do everything for you, but in my opinion, with the right set of tools you can get very, very close.  Let&amp;rsquo;s first talk about the tool that will get you the last 15%, and then the remainder of the post will be about chat, which is the 80% tool.&lt;/p&gt;
+
+&lt;h3 id=&#34;video-conferencing:da89dd30c63dded3f4644fe487658c11&#34;&gt;Video conferencing&lt;/h3&gt;
+
+&lt;p&gt;A tool that you should use as frequently as possible is some sort of video conferencing tool.  My personal favorite is Google Hangouts, but there are other inexpensive tools available.  Webcams are nearly ubiquitous, so you don&amp;rsquo;t need a $20,000 A/V conferencing set up.  You should use these tools directly from your own laptop.  Whenever you might have a problem communicating with chat, use video chat instead.  Use it for &amp;ldquo;face time&amp;rdquo;.  Use it for meetings.  This goes a long way toward making you feel like part of the group.  It does a lot to replace presence.&lt;/p&gt;
+
+&lt;h3 id=&#34;chat:da89dd30c63dded3f4644fe487658c11&#34;&gt;Chat&lt;/h3&gt;
+
+&lt;p&gt;Now, for the big one: chat.  Chat is by far the most important tool in your day-to-day toolbox, and everyone on your team should be using it.  &lt;em&gt;All&lt;/em&gt; team communication that is not in video conferencing should happen in your chat tool, even (and especially) between people that are co-located.  Chat makes your communications searchable, transparent, and explicit.  Sometimes chat communications aren&amp;rsquo;t clear, but video calls are useful for clearing those up.  Most importantly, chat makes your remote teammates &lt;em&gt;belong&lt;/em&gt; by not being left out.  When you have that hallway conversation in chat instead of in the hallway, your remote person gets to listen in.  If you have it in the hallway, you leave him or her out, which contributes to feelings of isolation - it&amp;rsquo;s really no good.  So commit to using chat.&lt;/p&gt;
+
+&lt;p&gt;Once you&amp;rsquo;re committed to chat, there are a few tips for making it better.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Keep things in a common chatroom or channel.  One of my gripes about Slack chat is that is encourages the proliferation of channels, but you don&amp;rsquo;t want to be more fragmented than on a team level.  Chat between people working on the same team should be in a common channel.  Sometimes people feel bashful about public chat and might lean toward starting private chats, but this is almost always unnecessary.  Think of it by analogy: anything you wouldn&amp;rsquo;t feel the need to say only after pulling a coworker aside and closing the door can and should be said in public.  If you &lt;em&gt;would&lt;/em&gt; pull a coworker aside and close the door, then a private chat is appropriate.&lt;/li&gt;
+&lt;li&gt;If your chat tool supports it, use replies so that conversations can be traced.  Slack&amp;rsquo;s doesn&amp;rsquo;t, unfortunately.  This is my only feature request for Slack, and they&amp;rsquo;ve been &amp;ldquo;working on it&amp;rdquo; for over a year, so I&amp;rsquo;m pretty pessimistic.&lt;/li&gt;
+&lt;li&gt;Use integrations, if possible.  If you have GitHub integrations and use GitHub for source control and issue tracking, use the GitHub links or notation if supported.&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;Take advantage of the fact that people can&amp;rsquo;t see your body language.  If you&amp;rsquo;re upset by something someone else said in chat, just chill for a bit and come up with the response that you won&amp;rsquo;t look back on with regret.  Be diplomatic and professional.&lt;/li&gt;
+&lt;li&gt;Learn to use the formatting capabilities of your chat.  This includes learning how to post images, because sometimes the best way to communicate is to take a screenshot (and possibly annotate it) and then refer to it in chat.&lt;/li&gt;
+&lt;li&gt;Learn your chat&amp;rsquo;s search features.  Slack has excellent search capabilities.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;That&amp;rsquo;s it for now (I may edit this list if I think of more).&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Hack the Backyard I</title>
+      <link>http://benjamincollins.com/blog/hack-the-backyard-i/</link>
+      <pubDate>Wed, 21 Oct 2015 09:24:49 -0500</pubDate>
+      
+      <guid>http://benjamincollins.com/blog/hack-the-backyard-i/</guid>
+      <description>
+
+&lt;h1 id=&#34;yarwppo:c28565d40807e5c7a9b5c1ff5a003b04&#34;&gt;YARWPPO&lt;/h1&gt;
+
+&lt;p&gt;Well, it seems like everyone I know is writing posts on working remotely&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:c28565d40807e5c7a9b5c1ff5a003b04:1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:c28565d40807e5c7a9b5c1ff5a003b04:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;, so I should do one too.  I&amp;rsquo;ve actually
+been doing this longer than almost everyone else I know working remotely, so it&amp;rsquo;s probably past time anyway.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://benjamincollins.com/img/no_idea_dog.jpg&#34; alt=&#34;actual remote worker&#34; title=&#34;actual remote worker&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;So does remote working mean you just play video games in your jammies all day, answering calls and email occasionally to make it look like you&amp;rsquo;re working?  What does remote working &lt;em&gt;actually&lt;/em&gt; look like?  Do remote workers actually get anything done without supervision?  How can a remote worker be successful?  What are some best practices for a remote worker?&lt;/p&gt;
+
+&lt;h1 id=&#34;yes-it-s-awesome:c28565d40807e5c7a9b5c1ff5a003b04&#34;&gt;Yes, It&amp;rsquo;s Awesome&lt;/h1&gt;
+
+&lt;p&gt;Working remotely is &lt;em&gt;really&lt;/em&gt; awesome.  Truly.  I can put in 8-10 hours days just like any other worker, but then instead of taking two hours of my life&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:c28565d40807e5c7a9b5c1ff5a003b04:2&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:c28565d40807e5c7a9b5c1ff5a003b04:2&#34;&gt;2&lt;/a&gt;&lt;/sup&gt; and flushing them down the toilet, while simultaneously contributing to poor air quality, traffic congestion, and paying for the privilege in the form of fuel and vehicle costs, I can:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;eat all three meals with my family every day&lt;/li&gt;
+&lt;li&gt;drink coffee made by my 6-year-old who is stoked to get to come into my office and push the french press plunger down&lt;/li&gt;
+&lt;li&gt;start work at 9am, but have already had 2 hours of time to do things that matter to me&lt;/li&gt;
+&lt;li&gt;work until 6 (or later, as often as not) but still get to have time for family or yardwork or other things that go off best with daylight.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&amp;hellip;and much more.&lt;/p&gt;
+
+&lt;h1 id=&#34;dem-tradeoffs:c28565d40807e5c7a9b5c1ff5a003b04&#34;&gt;Dem Tradeoffs&lt;/h1&gt;
+
+&lt;p&gt;As much as it&amp;rsquo;s awesome, there are some downsides as well, including some that any people don&amp;rsquo;t consider.&lt;/p&gt;
+
+&lt;h2 id=&#34;isolation:c28565d40807e5c7a9b5c1ff5a003b04&#34;&gt;Isolation&lt;/h2&gt;
+
+&lt;p&gt;It took me a long time to realize that this was affecting me.  People are &lt;em&gt;social&lt;/em&gt;, even anti-social ones (if there is
+nobody around to see how anti-social you are, how can you ever be satisfied that you are anti-social enough?).  I love the quietness of solitude.  I really, really do.  When I used to visit my girlfriend&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:c28565d40807e5c7a9b5c1ff5a003b04:3&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:c28565d40807e5c7a9b5c1ff5a003b04:3&#34;&gt;3&lt;/a&gt;&lt;/sup&gt; in college, it was a 3.5-hour drive.  I often made that drive without the radio on.  My girlfriend thought that was bizarre, but I easily filled the time with thoughts.  Even a man who is totally comfortable being left alone with his thoughts for hours on end without even background music needs human contact, and more than you might think.  I need to talk to people more than once a day.  It doesn&amp;rsquo;t have to be super personal, face-to-face, or even video chat.  Even just chatting on slack is good enough most days - I just need to feel connected, like I belong with the people I work with in some way.&lt;/p&gt;
+
+&lt;p&gt;&lt;blockquote class=&#34;twitter-tweet&#34; lang=&#34;en&#34;&gt;&lt;p lang=&#34;en&#34; dir=&#34;ltr&#34;&gt;STAGES OF WORKING FROM HOME&amp;#10;- Yay I get to work from home&amp;#10;- It would be nice to talk to people&amp;#10;- I hope that pigeon sits in the window today&lt;/p&gt;&amp;mdash; Mark Agee (@MarkAgee) &lt;a href=&#34;https://twitter.com/MarkAgee/status/620990471720992768&#34;&gt;July 14, 2015&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async src=&#34;//platform.twitter.com/widgets.js&#34; charset=&#34;utf-8&#34;&gt;&lt;/script&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;blockquote class=&#34;twitter-tweet&#34; lang=&#34;en&#34;&gt;&lt;p lang=&#34;en&#34; dir=&#34;ltr&#34;&gt;Too true. I have a photo collection of stray cats who have visited my yard ;-) &lt;a href=&#34;https://t.co/5GoQU0So0N&#34;&gt;https://t.co/5GoQU0So0N&lt;/a&gt;&lt;/p&gt;&amp;mdash; aggieben (@aggieben) &lt;a href=&#34;https://twitter.com/aggieben/status/621052944360673281&#34;&gt;July 14, 2015&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async src=&#34;//platform.twitter.com/widgets.js&#34; charset=&#34;utf-8&#34;&gt;&lt;/script&gt;&lt;/p&gt;
+
+&lt;p&gt;This is &lt;em&gt;really&lt;/em&gt; important.  What&amp;rsquo;s dangerous is that this is different than loneliness, so you won&amp;rsquo;t &lt;em&gt;feel&lt;/em&gt; isolated until it&amp;rsquo;s already impacting you.  You need to be connected to your company, your coworkers, your team - or you will have very little passion for what the team are trying to accomplish.  You won&amp;rsquo;t believe in the mission, and you won&amp;rsquo;t be as successful as an individual contributor as you could be because you just won&amp;rsquo;t care as much.&lt;/p&gt;
+
+&lt;h2 id=&#34;distraction:c28565d40807e5c7a9b5c1ff5a003b04&#34;&gt;Distraction&lt;/h2&gt;
+
+&lt;p&gt;I think many, many managers think this is the biggest risk in working remotely.  They&amp;rsquo;re wrong.  This is not a bigger
+risk than it is for people who work co-located, but it &lt;em&gt;is&lt;/em&gt; different.&lt;/p&gt;
+
+&lt;p&gt;People who are co-located are horrific distractions for each other.  Their managers are distractions.  The conversations
+that come floating over the cube walls are distractions.  Remote workers generally don&amp;rsquo;t face these kinds.  They face distractions more like: the UPS delivery; your wife can&amp;rsquo;t open the pickle jar and could you please come; kids who want to show you their latest drawing; flexing a little time to run a 15-minute errand.&lt;/p&gt;
+
+&lt;video poster=&#34;https://i-cdn.embed.ly/1/display?key=fd92ebbc52fc43fb98f69e50e7893c13&amp;url=http%3A%2F%2Fi.imgur.com%2F2PJ5OY2h.jpg&#34; preload=&#34;auto&#34; loop autoplay src=&#34;https://i.imgur.com/2PJ5OY2.webm&#34; title=&#34;does this work on big cats too?&#34;&gt;
+  &lt;source src=&#34;https://i.imgur.com/2PJ5OY2.webm&#34; type=&#34;video/webm&#34;&gt;
+  &lt;source src=&#34;https://i.imgur.com/2PJ5OY2.mp4&#34; type=&#34;video/mp4&#34;&gt;
+&lt;/video&gt;
+
+&lt;p&gt;Both remote workers and co-located workers face the temptation to lose time to cat videos&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:c28565d40807e5c7a9b5c1ff5a003b04:4&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:c28565d40807e5c7a9b5c1ff5a003b04:4&#34;&gt;4&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;dialup-communication:c28565d40807e5c7a9b5c1ff5a003b04&#34;&gt;Dialup Communication&lt;/h2&gt;
+
+&lt;p&gt;I love Slack (but I &lt;em&gt;really&lt;/em&gt; wish they had replies).  I think Google Hangouts is really very good at video conferencing
+for small groups or one-on-one calls.  GitHub issues are good for coordinating work.  One can always write an email.&lt;/p&gt;
+
+&lt;p&gt;But let me tell you something: there simply isn&amp;rsquo;t a technology that give you the same kind of communication bandwidth as
+a face-to-face conversation.  It simply doesn&amp;rsquo;t exist (although VR has come a long way; it will be interesting to see what happens in that space).  Subtle facial expressions, tone, and body language get lost to varying degrees when using technology to communicate.&lt;/p&gt;
+
+&lt;p&gt;This isn&amp;rsquo;t a big problem, just realize that it is what it is.&lt;/p&gt;
+
+&lt;p&gt;I&amp;rsquo;ll get to tips for success in part 2, coming soon&amp;hellip;&lt;/p&gt;
+
+&lt;p&gt;*[YARWPPO]: Yet Another Remote Working Post Part 1&lt;/p&gt;
+&lt;div class=&#34;footnotes&#34;&gt;
+
+&lt;hr /&gt;
+
+&lt;ol&gt;
+&lt;li id=&#34;fn:c28565d40807e5c7a9b5c1ff5a003b04:1&#34;&gt;well, like two people.  
+ &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:c28565d40807e5c7a9b5c1ff5a003b04:1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li id=&#34;fn:c28565d40807e5c7a9b5c1ff5a003b04:2&#34;&gt;I live an 60-75 minutes from the nearest tech hub, ergo most local jobs
+ &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:c28565d40807e5c7a9b5c1ff5a003b04:2&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li id=&#34;fn:c28565d40807e5c7a9b5c1ff5a003b04:3&#34;&gt;Good news!  I wifed her nearly 13 years ago!
+ &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:c28565d40807e5c7a9b5c1ff5a003b04:3&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li id=&#34;fn:c28565d40807e5c7a9b5c1ff5a003b04:4&#34;&gt;or any social media
+ &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:c28565d40807e5c7a9b5c1ff5a003b04:4&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>The Katana Pipeline</title>
+      <link>http://benjamincollins.com/blog/the-katana-pipeline/</link>
+      <pubDate>Tue, 28 Oct 2014 00:00:00 -0500</pubDate>
+      
+      <guid>http://benjamincollins.com/blog/the-katana-pipeline/</guid>
+      <description>
+
+&lt;h1 id=&#34;overview:cbe241ec96103174aae435338ae28589&#34;&gt;Overview&lt;/h1&gt;
+
+&lt;p&gt;Microsoft has undertaken a major effort to modernize its primary web framework, ASP.NET.  Unfortunately, the way those efforts have been communicated have been less than ideal. There have been a lot of different names of things: &lt;a href=&#34;http://www.zdnet.com/microsoft-shows-off-the-next-release-of-asp-net-7000029335/&#34;&gt;Project K&lt;/a&gt;, &lt;a href=&#34;http://blogs.msdn.com/b/webdev/archive/2014/02/18/introducing-asp-net-project-helios.aspx&#34;&gt;Helios&lt;/a&gt;, the &lt;a href=&#34;https://github.com/aspnet/KRuntime&#34;&gt;K Runtime&lt;/a&gt;, &lt;a href=&#34;http://owin.org/&#34;&gt;OWIN&lt;/a&gt;, &lt;a href=&#34;https://katanaproject.codeplex.com/&#34;&gt;Katana&lt;/a&gt;, and  &lt;a href=&#34;http://www.asp.net/vnext&#34;&gt;ASP.NET vNext&lt;/a&gt;.  Nevermind all the &amp;ldquo;I heard&amp;hellip;&amp;rdquo; kind of hearsay.  Even people who can understand all this get confused.  &lt;em&gt;I&amp;rsquo;m&lt;/em&gt; probably confused about some part of it.  What I can do here, though, is work through some of the key parts and try to arrive at some clarity.&lt;/p&gt;
+
+&lt;h1 id=&#34;owin:cbe241ec96103174aae435338ae28589&#34;&gt;OWIN&lt;/h1&gt;
+
+&lt;p&gt;First, let&amp;rsquo;s review OWIN, or &amp;ldquo;Open Web Server Interface for .NET&amp;rdquo;.  OWIN is &lt;em&gt;only&lt;/em&gt; a spec.  It is not a software implementation; it is a document (or set of documents) that describe an interface for .NET servers and .NET web applications. The figure below should give you an idea of how the main pieces of OWIN fit together.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://benjamincollins.com/img/IhvMo9Y.png&#34; alt=&#34;OWIN stack&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Note that IIS is both a server and a host (see the &lt;a href=&#34;http://owin.org/spec/spec/owin-1.0.0.html#Definition&#34;&gt;specification&lt;/a&gt; for more detailed information about exactly what each of these pieces are).  The Middleware layer represents a request-processing pipeline, composed of objects that implement the middleware interfaces.&lt;/p&gt;
+
+&lt;h1 id=&#34;katana:cbe241ec96103174aae435338ae28589&#34;&gt;Katana&lt;/h1&gt;
+
+&lt;p&gt;Microsoft&amp;rsquo;s currently-released implementation of the Server and Middleware parts of this stack is called &amp;ldquo;Katana&amp;rdquo;.  &lt;a href=&#34;http://www.asp.net/aspnet/overview/owin-and-katana/an-overview-of-project-katana&#34;&gt;The Katana project&lt;/a&gt; not only provides middleware and server components, but also  supporting artifacts, such as adapter layers that convert IIS semantics to OWIN semantics. Today&amp;rsquo;s ASP.NET is an implementation of the Web Framework layer.&lt;/p&gt;
+
+&lt;p&gt;Strictly speaking, OWIN doesn&amp;rsquo;t prescribe exactly how requests must be processed, just that the request processing must
+be modeled by an application delegate with the following type:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-C#&#34;&gt;using AppFunc = Func&amp;lt;IDictionary&amp;lt;string, object&amp;gt;, Task&amp;gt;;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The application must either complete the Task returned by this delegate or throw an exception.  Katana implements this application delegate by configuring (either in code or in the &lt;code&gt;web.config&lt;/code&gt;) a set of middleware components during the OWIN startup.  For example:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-C#&#34;&gt;public partial class Startup
+{
+    public void Configuration(IAppBuilder app)
+    {
+        app.UseExternalSignInCookie(
+            DefaultAuthenticationTypes.ExternalCookie);
+        app.UseGoogleAuthentication(
+            new GoogleOAuth2AuthenticationOptions
+            {
+                ClientId = &amp;quot;clientId&amp;quot;,
+                ClientSecret = &amp;quot;clientSecret&amp;quot;,
+            });
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In the sample code above, the Katana pipeline is configured to include middleware to authenticate users using Google OAuth2 authentication.  Once the &lt;code&gt;Configuration&lt;/code&gt; method is complete, Katana takes the map of configured middleware and composes it into the &lt;code&gt;AppFunc&lt;/code&gt; delegate defined above by chaining them together, so that each middleware calls the next one (or throws an exception) in the pipeline and then finally returns a &lt;code&gt;Task&lt;/code&gt; asynchronously.&lt;/p&gt;
+
+&lt;p&gt;.NET lends itself to composing this application delegate of reusable interface implementations through the use of lambdas.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://benjamincollins.com/img/smdVtgP.png&#34; alt=&#34;OWIN Pipeline chart&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;A very natural expression of this kind of composition is a pipline as visualized at a very high level in the figure above.  Incoming client requests are handled by the Host and Server implementations (again, with IIS there isn&amp;rsquo;t a meaningful distinction), and then a chain of Middleware components are given an opportunity to do additional processing before the request is handled by the application.&lt;/p&gt;
+
+&lt;p&gt;What is passed between each part of the pipeline is represented by an object with the &lt;code&gt;IDictionary&amp;lt;string, object&amp;gt;&lt;/code&gt; interface.  The spec describes this quite succinctly:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;The Environment dictionary stores information about the request, the response, and any relevant server state.  The server is responsible for providing body streams and header collections for both the request and response in the initial call.  The application then populates the appropriate fields with response data, writes the response body, and returns when done. [&lt;a href=&#34;http://owin.org/html/owin.html#32-environment&#34;&gt;§3.2&lt;/a&gt;]&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Middleware is considered to be part of the Application in this context.&lt;/p&gt;
+
+&lt;h2 id=&#34;iis-request-processing:cbe241ec96103174aae435338ae28589&#34;&gt;IIS Request Processing&lt;/h2&gt;
+
+&lt;p&gt;The Katana pipeline sounds great, but how does it interact with the existing IIS/ASP.NET architecture?  This is illustrated in the diagram below.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://benjamincollins.com/img/Mb5eq7I.png&#34; alt=&#34;IIS pipeline&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;ASP.NET configures a routing module to process the &lt;code&gt;PostResolveRequestCache&lt;/code&gt; and &lt;code&gt;PostMapRequestHandler&lt;/code&gt; events and writes information about matching handlers to the context.  When the &lt;code&gt;Execute Handler&lt;/code&gt; stage is processed, matching handlers are executed.  Katana provides an &lt;code&gt;IHttpHandler&lt;/code&gt; implementation that translates a &lt;code&gt;System.Web&lt;/code&gt; request into an OWIN context: &lt;a href=&#34;http://katanaproject.codeplex.com/SourceControl/latest#src/Microsoft.Owin.Host.SystemWeb/OwinHttpHandler.cs&#34;&gt;&lt;code&gt;OwinHttpHandler&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Another included host is the &lt;code&gt;HttpListener&lt;/code&gt; host, which is exactly what it sounds like: an OWIN-compliant host that doesn&amp;rsquo;t rely on IIS, but can receive incoming requests from any source.&lt;/p&gt;
+
+&lt;p&gt;A host that isn&amp;rsquo;t included in Katana, but was &lt;a href=&#34;https://www.nuget.org/packages/Microsoft.Owin.Host.IIS/&#34;&gt;published separately&lt;/a&gt;, is an IIS host without a dependency on System.Web.  This host used to be called &lt;a href=&#34;http://blogs.msdn.com/b/webdev/archive/2014/02/18/introducing-asp-net-project-helios.aspx&#34;&gt;Project Helios&lt;/a&gt; and leverages the capabilities of IIS, but doesn&amp;rsquo;t involve System.Web in request processing.  The project is now published with ASP.NET vNext on myget.org as &lt;a href=&#34;https://www.myget.org/gallery/aspnetvnext&#34;&gt;Microsoft.AspNet.Server.IIS&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;asp-net-vnext:cbe241ec96103174aae435338ae28589&#34;&gt;ASP.NET vNext&lt;/h2&gt;
+
+&lt;p&gt;&lt;em&gt;Update February 2016: this new framework is now called ASP.NET Core&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;The next major release of ASP.NET vNext takes all this and makes it much more apparent &lt;a href=&#34;https://katanaproject.codeplex.com/wikipage?title=roadmap&#34;&gt;where all this is going&lt;/a&gt;.  vNext takes Katana and folds it into the ASP.NET framework proper.  MVC and WebAPI are unified on this pipeline, and the project infrastructure has been rebuilt around a simpler, more readable JSON format.  Perhaps most importantly, vNext relieves applications of the traditional ASP.NET dependency on System.Web, which in turn has a dependency on IIS.  By implementing the OWIN specification, ASP.NET will be runnable with any host that likewise implements OWIN - which allows for a wide range of application architectures.  You can build an application that gets raw requests and writes diretly to the output, without pretty much anything in between.  You can still write System.Web applications (thanks to the Katana-cum-vNext System.Web-based host implementation), or you can write an application that takes advantage of the highly-configurable OWIN pipeline with pluggable middleware, à la Node.js - and it doesn&amp;rsquo;t even have to be on Windows.&lt;/p&gt;
+
+&lt;p&gt;ASP.NET vNext &amp;ldquo;alpha4&amp;rdquo; was recently released along with &lt;a href=&#34;http://www.visualstudio.com/en-us/downloads/visual-studio-14-ctp-vs.aspx&#34;&gt;Visual Studio &amp;ldquo;14&amp;rdquo; CTP4&lt;/a&gt;, which now supports Nuget packages and has stabilized the names of the runtimes (hopefully), so it is much more &amp;ldquo;ready&amp;rdquo; than it was even just a few weeks prior.&lt;/p&gt;
+
+&lt;p&gt;Be sure and check out the latest vNext developments at &lt;a href=&#34;https://github.com/aspnet/Home&#34;&gt;https://github.com/aspnet/Home&lt;/a&gt;.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Recommended resources:&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;http://herdingcode.com/herding-code-164-owin-and-katana-with-louis-dejardin/&#34;&gt;http://herdingcode.com/herding-code-164-owin-and-katana-with-louis-dejardin/&lt;/a&gt;
+&lt;a href=&#34;https://support.microsoft.com/kb/2967191?wa=wsignin1.0&#34;&gt;https://support.microsoft.com/kb/2967191?wa=wsignin1.0&lt;/a&gt;
+&lt;a href=&#34;http://owin.org/html/owin.html&#34;&gt;http://owin.org/html/owin.html&lt;/a&gt;
+&lt;a href=&#34;http://blogs.msdn.com/b/webdev/archive/2014/02/18/introducing-asp-net-project-helios.aspx&#34;&gt;http://blogs.msdn.com/b/webdev/archive/2014/02/18/introducing-asp-net-project-helios.aspx&lt;/a&gt;
+&lt;a href=&#34;http://www.asp.net/aspnet/overview/owin-and-katana/an-overview-of-project-katana&#34;&gt;http://www.asp.net/aspnet/overview/owin-and-katana/an-overview-of-project-katana&lt;/a&gt;
+&lt;a href=&#34;https://katanaproject.codeplex.com/wikipage?title=roadmap&#34;&gt;https://katanaproject.codeplex.com/wikipage?title=roadmap&lt;/a&gt;&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

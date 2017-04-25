@@ -12,7 +12,9 @@
     <Content Include="html\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Compile Include="**/*.fs" />
+    <Compile Include="Utils.fs" />
+    <Compile Include="WebTests.fs" />
+    <Compile Include="SyndicationTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\BitThicket.Concull.Feeds\BitThicket.Concull.Feeds.fsproj" />
